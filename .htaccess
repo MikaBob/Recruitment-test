@@ -1,0 +1,12 @@
+RewriteEngine on
+DirectoryIndex entrypoint.php
+
+# All request are redirect to entrypoint, except css, js and png files in public_html
+RewriteCond %{REQUEST_URI} !public_html/.*\.(?:css|js|png)$ [NC]
+RewriteRule ^(.+)$ entrypoint.php [L]
+
+
+# non existing files or directories are redirect to entrypoint
+RewriteCond %{REQUEST_FILENAME} !-f 
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)$ entrypoint.php [L]
