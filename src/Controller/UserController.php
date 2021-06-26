@@ -4,7 +4,7 @@ namespace Blexr\Controller;
 
 use Blexr\Entity\User;
 
-class UserController {
+class UserController extends DefaultController {
 
     public function index() {
         $user = new User();

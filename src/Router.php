@@ -40,7 +40,7 @@ class Router {
         }
 
         $request = [
-            'controller' => empty($path[1]) ? 'Index' : ucfirst($path[1]),
+            'controller' => empty($path[1]) ? 'Home' : ucfirst($path[1]),
             'action' => empty($path[2]) ? 'index' : $path[2],
             'params' => $params
         ];
