@@ -1,4 +1,7 @@
 <?php
-echo "<h1>It works !</h1>\n\n".$_SERVER['REQUEST_URI'];
 
-?>
+require __DIR__ . '\\Autoloader.php';
+
+use Blexr\Router;
+
+Router::handleRequest();
