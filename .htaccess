@@ -7,6 +7,6 @@ RewriteRule ^(.+)$ entrypoint.php [L]
 
 
 # non existing files or directories are redirect to entrypoint
-RewriteCond %{REQUEST_FILENAME} !-f 
+RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.+)$ entrypoint.php [L]

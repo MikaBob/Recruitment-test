@@ -1,0 +1,17 @@
+body {
+    margin: auto;
+    padding: 0px;
+    max-width: 1200px;
+}
+
+header {
+    background-color: rgb(40, 57, 74);
+}
+
+header a {
+    color: white !important;
+}
+
+.navbar-toggler-icon {
+    background-image: url('/public_html/navbar-toggler-icon.png');
+}
