@@ -5,23 +5,23 @@
 {% block content %}
     <h2>User list</h2>
     <div class="my-1 float-end">
-        <a href="user/create" class="btn btn-outline-primary btn">Add new user</a>
+        <a href="/user/create" class="btn btn-outline-primary btn">Add new user</a>
     </div>
     <table class="table table-striped table-hover table-bordered">
         <tr>
             <th scope="col">First name</th>
             <th scope="col">Last name</th>
-            <th scope="col">Username</th>
+            <th scope="col">Email</th>
             <th scope="col">Creation date</th>
             <th scope="col">Last connection</th>
         </tr>
     {% for user in users %}
         <tr scope="row">
-            <td>{{ user.first_name }}</td>
-            <td>{{ user.last_name }}</td>
-            <td>{{ user.username }}</td>
-            <td>{{ user.creation_date }}</td>
-            <td>{{ user.last_login}}</td>
+            <td>{{ user.firstName }}</td>
+            <td>{{ user.lastName }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.creationDate }}</td>
+            <td>{{ user.lastLogin}}</td>
         </tr>
     {% endfor %}
     </table>

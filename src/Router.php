@@ -8,13 +8,14 @@ class Router {
         $request = self::parseUri();
         if (!empty($request)) {
             $controllerName = $request['controller'];
-            $fullQualifiedClassName = "Blexr\\Controller\\{$controllerName}Controller";
+            $fullQualifiedClassName = self::getControllerFullQualifiedName($controllerName);
             $action = $request['action'];
             $params = $request['params'];
 
             // will call autoloader if class not already loaded.
             if (class_exists($fullQualifiedClassName, true)) {
                 if (method_exists($fullQualifiedClassName, $action)) {
+
                     $controller = new $fullQualifiedClassName();
                     echo call_user_func([$controller, $action], $params);
                 } else {
@@ -30,7 +31,7 @@ class Router {
     }
 
     private static function parseUri() {
-        $path = explode('/', $_SERVER['REQUEST_URI']);
+        $path = explode('/', filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_SPECIAL_CHARS));
         $params = [];
 
         if (count($path) > 3) {
@@ -46,6 +47,18 @@ class Router {
         ];
 
         return $request;
+    }
+
+    private static function getControllerFullQualifiedName($controllerName) {
+        return "Blexr\\Controller\\{$controllerName}Controller";
+    }
+
+    public static function generateUrl($controllerName, $action) {
+        $fullQualifiedClassName = self::getControllerFullQualifiedName($controllerName);
+        if (class_exists($fullQualifiedClassName, true) && method_exists($fullQualifiedClassName, $action)) {
+            return 'http://' . filter_input(INPUT_SERVER, 'SERVER_NAME', FILTER_VALIDATE_DOMAIN) . "/{$controllerName}/$action";
+        }
+        return null;
     }
 
 }
