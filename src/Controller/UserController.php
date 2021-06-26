@@ -2,14 +2,17 @@
 
 namespace Blexr\Controller;
 
-use Blexr\Entity\User;
+use Blexr\Model\UserDAO;
 
 class UserController extends DefaultController {
 
     public function index() {
-        $user = new User();
 
-        return $user->getName();
+        $userDAO = new UserDAO();
+
+        $users = $userDAO->getAll();
+
+        echo $this->twig->render('User/index.html.twig', ['users' => $users]);
     }
 
 }

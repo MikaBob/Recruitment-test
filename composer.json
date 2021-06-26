@@ -1,6 +1,7 @@
 {
     "name": "bob/blexr",
     "require": {
-        "twig/twig": "^3.0"
+        "twig/twig": "^3.0",
+        "vlucas/phpdotenv": "^5.3"
     }
 }

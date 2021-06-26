@@ -1,6 +1,6 @@
 <?php
 
-namespace Blexr\Entity;
+namespace Blexr\Mdeol\Entity;
 
 class User {
 

@@ -5,7 +5,7 @@ namespace Blexr\Controller;
 use \Twig\Loader\FilesystemLoader as Twig_Loader_Filesystem;
 use \Twig\Environment as Twig_Environment;
 
-class DefaultController {
+abstract class DefaultController {
 
     protected $twig;
 
