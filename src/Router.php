@@ -35,7 +35,7 @@ class Router {
         $params = [];
 
         if (count($path) > 3) {
-            for ($i = 0; $i < count($path); $i++) {
+            for ($i = 3; $i < count($path); $i++) {
                 $params[] = $path[$i];
             }
         }

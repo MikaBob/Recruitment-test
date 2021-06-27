@@ -2,7 +2,12 @@
 
 namespace Blexr\Model\Entity;
 
-class User {
+class User implements \JsonSerializable {
+
+    /**
+     * @var int
+     */
+    private $id;
 
     /**
      * @var string|null
@@ -39,6 +44,10 @@ class User {
      */
     private $dynamicFields;
 
+    function getId(): ?int {
+        return $this->id;
+    }
+
     function getFirstName(): ?string {
         return $this->firstName;
     }
@@ -67,6 +76,10 @@ class User {
         return $this->dynamicFields;
     }
 
+    function setId(int $id): void {
+        $this->id = $id;
+    }
+
     function setFirstName(?string $firstName): void {
         $this->firstName = $firstName;
     }
@@ -93,6 +106,19 @@ class User {
 
     function setDynamicFields(?string $dynamicFields): void {
         $this->dynamicFields = $dynamicFields;
+    }
+
+    public function jsonSerialize(): mixed {
+        return [
+            'id' => $this->getId(),
+            'firstName' => $this->getFirstName(),
+            'lastName' => $this->getLastName(),
+            'email' => $this->getEmail(),
+            'password' => $this->getPassword(),
+            'creationDate' => $this->getCreationDate(),
+            'lastLogin' => $this->getLastLogin(),
+            'dynamicFields' => $this->getDynamicFields(),
+        ];
     }
 
 }

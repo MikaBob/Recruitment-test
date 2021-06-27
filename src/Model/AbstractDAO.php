@@ -17,4 +17,13 @@ abstract class AbstractDAO {
         return $query->fetchAll();
     }
 
+    public function getById($id) {
+        if (is_numeric($id) && $id > 0) {
+            $query = $this->dbConnection->prepare("SELECT * FROM $this->tableName WHERE id = :id");
+            $query->execute([':id' => $id]);
+            return $query->fetch(\PDO::FETCH_OBJ);
+        }
+        return null;
+    }
+
 }
