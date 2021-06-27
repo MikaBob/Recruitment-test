@@ -9,6 +9,7 @@
     </div>
     <div id="alert" class="alert alert-danger alert-dismissible" style="display: none;" role="alert"></div>
     <table class="table table-striped table-hover table-bordered">
+        <caption>List of user</caption>
         <tr>
             <th scope="col">First name</th>
             <th scope="col">Last name</th>
@@ -42,6 +43,7 @@
                     <div id="modalAlert" class="alert alert-danger alert-dismissible" style="display: none;" role="alert"></div>
                     <div class="modal-body">
                         <table class="table table-striped table-hover table-bordered">
+                            <caption>User profile</caption>
                             <tr>
                                 <td><b>First name</b></td>
                                 <td><input id="firstName" name="firstName" type="text" value=""/></td>
@@ -52,7 +54,30 @@
                             </tr>
                             <tr>
                                 <td><b>Email</b></td>
-                                <td><input id="email" name="email" type="email" value=""/></td>
+                                <td><input id="email" name="email" type="text" value=""/></td>
+                            </tr>
+                        </table>
+                        <table class="table table-striped table-hover table-bordered">
+                            <caption>Onboarding tasks</caption>
+                            <tr>
+                                <th></th>
+                                <th><b>Is done ?</b></th>
+                            </tr>
+                            <tr>
+                                <td>Microsoft Office license</td>
+                                <td><input id="dynamicFields_MOL" type="checkbox" /></td>
+                            </tr>
+                            <tr>
+                                <td>Email access granted</td>
+                                <td><input id="dynamicFields_EAG" type="checkbox" /></td>
+                            </tr>
+                            <tr>
+                                <td>Git repository granted</td>
+                                <td><input id="dynamicFields_GRG" type="checkbox" /></td>
+                            </tr>
+                            <tr>
+                                <td>Jira access granted</td>
+                                <td><input id="dynamicFields_JAG" type="checkbox" /></td>
                             </tr>
                         </table>
                     </div>
@@ -73,7 +98,6 @@
                 type: 'GET',
 
                 success: function(data) {
-                    console.log(data);
                     if(data.status !== 200) {
                         $('#alert').text('Error: ' + data.error);
                         $('#alert').fadeIn();
@@ -83,11 +107,23 @@
                         }, 3000);
                     } else {
                         let user = data.user;
+
                         $('#modalTitle').text('Edit user ' + user.email);
                         $('#modalForm #userId').val(user.id);
                         $('#modalForm #firstName').val(user.firstName);
                         $('#modalForm #lastName').val(user.lastName);
                         $('#modalForm #email').val(user.email);
+                        if(user.dynamicFields !== null){
+                            $('#modalForm #dynamicFields_MOL').prop("checked", (typeof user.dynamicFields.MOL !== 'undefined') ? user.dynamicFields.MOL : false);
+                            $('#modalForm #dynamicFields_EAG').prop("checked", (typeof user.dynamicFields.EAG !== 'undefined') ? user.dynamicFields.EAG : false);
+                            $('#modalForm #dynamicFields_GRG').prop("checked", (typeof user.dynamicFields.GRG !== 'undefined') ? user.dynamicFields.GRG : false);
+                            $('#modalForm #dynamicFields_JAG').prop("checked", (typeof user.dynamicFields.JAG !== 'undefined') ? user.dynamicFields.JAG : false);
+                        } else {
+                            $('#modalForm #dynamicFields_MOL').prop("checked", false);
+                            $('#modalForm #dynamicFields_EAG').prop("checked", false);
+                            $('#modalForm #dynamicFields_GRG').prop("checked", false);
+                            $('#modalForm #dynamicFields_JAG').prop("checked", false);
+                        }
                         $('#modalCenter').modal('show');
                     }
                 }
@@ -98,10 +134,17 @@
             e.preventDefault();
 
             let userId = $('#modalForm #userId').val();
+
             var data = {
                 'firstName' : $('#modalForm #firstName').val(),
                 'lastName' : $('#modalForm #lastName').val(),
-                'email' : $('#modalForm #email').val()
+                'email' : $('#modalForm #email').val(),
+                'dynamicFields' : {
+                    'MOL' : $('#modalForm #dynamicFields_MOL').prop("checked"),
+                    'EAG' : $('#modalForm #dynamicFields_EAG').prop("checked"),
+                    'GRG' : $('#modalForm #dynamicFields_GRG').prop("checked"),
+                    'JAG' : $('#modalForm #dynamicFields_JAG').prop("checked")
+                }
             };
 
             $.ajax({

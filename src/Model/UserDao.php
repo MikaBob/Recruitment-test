@@ -10,15 +10,16 @@ class UserDAO extends AbstractDAO {
 
     public function insert(User $user) {
         $query = $this->dbConnection->prepare(""
-                . "INSERT INTO $this->tableName (firstName, lastName, email, creationDate, password) "
-                . "VALUES (:firstName, :lastName, :email, :creationDate, :password)");
+                . "INSERT INTO $this->tableName (firstName, lastName, email, creationDate, password, dynamicFields) "
+                . "VALUES (:firstName, :lastName, :email, :creationDate, :password, :dynamicFields)");
 
         $query->execute([
             ':firstName' => $user->getFirstName(),
             ':lastName' => $user->getLastName(),
             ':email' => $user->getEmail(),
             ':creationDate' => $user->getCreationDate()->format('c'),
-            ':password' => $user->getPassword()
+            ':password' => $user->getPassword(),
+            ':dynamicFields' => json_encode($user->getDynamicFields()),
         ]);
 
         return $query->fetchAll();
@@ -26,13 +27,14 @@ class UserDAO extends AbstractDAO {
 
     public function update(User $user) {
         $query = $this->dbConnection->prepare(""
-                . "UPDATE $this->tableName SET firstName = :firstName, lastName = :lastName, email = :email "
+                . "UPDATE $this->tableName SET firstName = :firstName, lastName = :lastName, email = :email, dynamicFields = :dynamicFields "
                 . "WHERE id = :id");
 
         $query->execute([
             ':firstName' => $user->getFirstName(),
             ':lastName' => $user->getLastName(),
             ':email' => $user->getEmail(),
+            ':dynamicFields' => json_encode($user->getDynamicFields()),
             ':id' => $user->getId()
         ]);
 
@@ -51,7 +53,7 @@ class UserDAO extends AbstractDAO {
             $user->setPassword($obj->password);
             $user->setCreationDate(new \DateTime($obj->creationDate));
             $user->setLastLogin($obj->lastLogin === null ? null : new \DateTime($obj->lastLogin));
-            $user->setDynamicFields($obj->dynamicFields);
+            $user->setDynamicFields(json_decode($obj->dynamicFields, true));
 
             return $user;
         }

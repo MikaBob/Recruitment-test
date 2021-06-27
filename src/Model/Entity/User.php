@@ -2,7 +2,9 @@
 
 namespace Blexr\Model\Entity;
 
-class User implements \JsonSerializable {
+use Blexr\Model\UserAbstract;
+
+class User extends UserAbstract implements \JsonSerializable {
 
     /**
      * @var int
@@ -40,7 +42,7 @@ class User implements \JsonSerializable {
     private $lastLogin;
 
     /**
-     * @var string|null
+     * @var array|null
      */
     private $dynamicFields;
 
@@ -72,7 +74,7 @@ class User implements \JsonSerializable {
         return $this->lastLogin;
     }
 
-    function getDynamicFields(): ?string {
+    function getDynamicFields(): ?array {
         return $this->dynamicFields;
     }
 
@@ -104,7 +106,7 @@ class User implements \JsonSerializable {
         $this->lastLogin = $lastLogin;
     }
 
-    function setDynamicFields(?string $dynamicFields): void {
+    function setDynamicFields(?array $dynamicFields): void {
         $this->dynamicFields = $dynamicFields;
     }
 

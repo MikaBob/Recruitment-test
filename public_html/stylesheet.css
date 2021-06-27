@@ -15,3 +15,7 @@ header a {
 .navbar-toggler-icon {
     background-image: url('/public_html/navbar-toggler-icon.png');
 }
+
+table {
+    caption-side: top;
+}
