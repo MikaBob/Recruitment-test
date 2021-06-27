@@ -29,6 +29,7 @@ class UserController extends DefaultController {
 
             /**
              * @TODO make real validation with constraints
+             * @TODO check if email already exist
              */
             $firstName = filter_input(INPUT_POST, 'firstName', FILTER_SANITIZE_STRING);
             $lastName = filter_input(INPUT_POST, 'lastName', FILTER_SANITIZE_STRING);

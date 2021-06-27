@@ -9,6 +9,7 @@ use Blexr\Router;
 class UserAPIController {
 
     public function get($params) {
+        header("Content-Type: application/json; charset=UTF-8");
 
         if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) !== "GET") {
             return json_encode(['status' => 400, 'error' => 'Bad Request']);
@@ -16,30 +17,27 @@ class UserAPIController {
 
         $id = $params[0];
 
-        header("Content-Type: application/json; charset=UTF-8");
-
         $userDAO = new UserDAO();
         $user = $userDAO->getById($id);
-
-        // Do not show users's password
-        $user->setPassword('');
 
         if ($user === null) {
             return json_encode(['status' => 404, 'error' => 'User not found']);
         }
 
+        // Do not show users's password
+        $user->setPassword('');
+
         return json_encode(['status' => 200, 'user' => $user]);
     }
 
     public function post($params) {
+        header("Content-Type: application/json; charset=UTF-8");
 
         if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) !== "POST") {
             return json_encode(['status' => 400, 'error' => 'Bad Request']);
         }
 
         $id = $params[0];
-
-        header("Content-Type: application/json; charset=UTF-8");
 
         $userDAO = new UserDAO();
         $user = $userDAO->getById($id);
@@ -50,6 +48,7 @@ class UserAPIController {
 
         /**
          * @TODO make real validation with constraints
+         * @TODO check if email already exist
          */
         $firstName = filter_input(INPUT_POST, 'firstName', FILTER_SANITIZE_STRING);
         $lastName = filter_input(INPUT_POST, 'lastName', FILTER_SANITIZE_STRING);

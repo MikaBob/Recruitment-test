@@ -44,20 +44,38 @@ class UserDAO extends AbstractDAO {
     public function getById($id): ?User {
         $obj = parent::getById($id);
 
-        if ($obj !== null) {
-            $user = new User();
-            $user->setId($obj->id);
-            $user->setFirstName($obj->firstName);
-            $user->setLastName($obj->lastName);
-            $user->setEmail($obj->email);
-            $user->setPassword($obj->password);
-            $user->setCreationDate(new \DateTime($obj->creationDate));
-            $user->setLastLogin($obj->lastLogin === null ? null : new \DateTime($obj->lastLogin));
-            $user->setDynamicFields(json_decode($obj->dynamicFields, true));
-
-            return $user;
+        if ($obj !== false) {
+            $this->fromObjToUser($obj);
         }
         return null;
+    }
+
+    public function getByEmail($email): ?User {
+        if (is_string($email) && $email !== '') {
+            $query = $this->dbConnection->prepare("SELECT * FROM $this->tableName WHERE email = :email");
+            $query->execute([':email' => $email]);
+
+            $result = $query->fetch(\PDO::FETCH_OBJ);
+
+            if ($result !== false) {
+                return $this->fromObjToUser($result);
+            }
+        }
+        return null;
+    }
+
+    private function fromObjToUser($obj): User {
+        $user = new User();
+        $user->setId($obj->id);
+        $user->setFirstName($obj->firstName);
+        $user->setLastName($obj->lastName);
+        $user->setEmail($obj->email);
+        $user->setPassword($obj->password);
+        $user->setCreationDate(new \DateTime($obj->creationDate));
+        $user->setLastLogin($obj->lastLogin === null ? null : new \DateTime($obj->lastLogin));
+        $user->setDynamicFields(json_decode($obj->dynamicFields, true));
+
+        return $user;
     }
 
 }

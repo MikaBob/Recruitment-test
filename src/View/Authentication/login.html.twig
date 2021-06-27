@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+<div class="row text-center">
+    <h3 class="">You know the drill, if you want to get in, you need to log in ;)</h3>
+    <form class="mx-auto col-6" onsubmit="return login();">
+        <div class="form-group">
+            <input
+                type='text'
+                name='username'
+                id='username'
+                placeholder='Email'
+                class='form-control'
+                />
+        </div>
+        <div class="form-group">
+            <input
+                type='password'
+                name='password'
+                id='password'
+                placeholder='Password'
+                class='form-control'
+                />
+        </div>
+        <div class="form-group">
+            <button class='btn btn-primary border border-secondary w-100'>
+                Let me IN !!!
+            </button>
+            <a class="btn w-100" href="#" onclick="forgottenPassword()">Password forgotten ?</a>
+        </div>
+    </form>
+    <div id="alert" class="alert alert-danger alert-dismissible" style="display: none;" role="alert"></div>
+
+    <script type="text/javascript">
+        function login(){
+            var data = {
+                'username' : $('#username').val(),
+                'password' : $('#password').val()
+            };
+
+            $.ajax({
+                url: "/authentication/login",
+                async: true,
+                data: data,
+                type: 'POST',
+
+                success: function(data) {
+                    if(data.status !== 200) {
+                        $('#alert').text('Error: ' + data.error);
+                        $('#alert').fadeIn();
+                        setTimeout(()=>{
+                            $('#alert').text('');
+                            $('#alert').fadeOut();
+                        }, 3000);
+                    }
+                }
+            });
+
+            return false;
+        }
+
+        function forgottenPassword(){
+            $('#alert').text('Too bad :/');
+            $('#alert').show();
+            setTimeout(()=>{
+                $('#alert').text('');
+                $('#alert').fadeOut();
+            }, 3000);
+        }
+    </script>
+</div>
+
+
+{% endblock %}

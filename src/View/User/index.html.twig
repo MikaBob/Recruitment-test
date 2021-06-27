@@ -32,7 +32,7 @@
     <div class="modal fade" id="modalCenter" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <form id="modalForm" onsubmit="return saveChanges(event)">
+                <form id="modalForm" onsubmit="return saveChanges();">
                     <input id="userId" name="userId" type="hidden" value=""/>
                     <div class="modal-header">
                         <h5 class="modal-title" id="modalTitle"></h5>
@@ -130,9 +130,7 @@
             });
         }
 
-        function saveChanges(e) {
-            e.preventDefault();
-
+        function saveChanges() {
             let userId = $('#modalForm #userId').val();
 
             var data = {
