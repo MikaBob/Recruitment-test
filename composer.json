@@ -2,6 +2,8 @@
     "name": "bob/blexr",
     "require": {
         "twig/twig": "^3.0",
-        "vlucas/phpdotenv": "^5.3"
+        "twig/intl-extra": "^3.3",
+        "vlucas/phpdotenv": "^5.3",
+        "phpmailer/phpmailer": "^6.5"
     }
 }

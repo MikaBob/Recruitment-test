@@ -20,7 +20,7 @@
             <td>{{ user.firstName }}</td>
             <td>{{ user.lastName }}</td>
             <td>{{ user.email }}</td>
-            <td>{{ user.creationDate }}</td>
+            <td>{{ user.creationDate|format_datetime('short', 'short') }}</td>
             <td>{{ user.lastLogin}}</td>
         </tr>
     {% endfor %}

@@ -8,7 +8,7 @@ abstract class AbstractDAO {
     protected $tableName;
 
     public function __construct() {
-        $this->dbConnection = new \PDO($_ENV['DB_DSN'], $_ENV['DB_USER'], $_ENV['DB_PASS']);
+        $this->dbConnection = new \PDO($_ENV['DB_DSN'], $_ENV['DB_USER'], $_ENV['DB_PASSWORD']);
     }
 
     public function getAll() {

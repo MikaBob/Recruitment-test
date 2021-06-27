@@ -5,6 +5,7 @@ namespace Blexr\Controller;
 use Blexr\Model\Entity\User;
 use Blexr\Model\UserDAO;
 use Blexr\Router;
+use Blexr\MailSender;
 
 class UserController extends DefaultController {
 
@@ -48,10 +49,25 @@ class UserController extends DefaultController {
             $userDAO = new UserDAO();
             $userDAO->insert($user);
 
-            /**
-             * @TODO send email
-             */
-            header('Location: ' . Router::generateUrl('user', 'index'));
+
+            $mailer = new MailSender();
+
+
+            $isMailSend = $mailer->sendMail(
+                    $user->getEmail(),
+                    'Blexr account created',
+                    $this->twig->render('User/welcomeEmail.html.twig', [
+                        'user' => $user,
+                        'password' => $password,
+                        'url' => filter_input(INPUT_SERVER, 'SERVER_NAME', FILTER_VALIDATE_DOMAIN)
+                    ])
+            );
+
+            if ($isMailSend) {
+                header('Location: ' . Router::generateUrl('user', 'index'));
+            } else {
+                $errors[] = $mailer->getError();
+            }
         }
 
         echo $this->twig->render('User/create.html.twig', [

@@ -4,6 +4,7 @@ namespace Blexr\Controller;
 
 use \Twig\Loader\FilesystemLoader as Twig_Loader_Filesystem;
 use \Twig\Environment as Twig_Environment;
+use \Twig\Extra\Intl\IntlExtension;
 
 abstract class DefaultController {
 
@@ -22,6 +23,7 @@ abstract class DefaultController {
             'auto_reload' => true // disable cache (for dev)
         );
         $this->twig = new Twig_Environment($loader, $params);
+        $this->twig->addExtension(new IntlExtension());
     }
 
 }

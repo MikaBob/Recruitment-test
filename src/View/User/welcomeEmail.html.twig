@@ -1,0 +1,14 @@
+<h1>Account for Blexr succesfully created !</h1>
+<br/>
+<div>
+    <p>Hi {{ user.firstName }} {{ user.lastName }}Your account has been created the {{ user.creationDate|format_datetime('short', 'short') }}.<br><br>Here are your login information:</p>
+    <br>
+    <table>
+        <tr><td><b>Username:</b></td><td>{{ user.email }}</td></tr>
+        <tr><td><b>Password:</b></td><td>{{ password }}</td></tr>
+    </table>
+    <br>
+    <div style="color: red;">Please <b>change your password</b> as soon as possible !</div>
+    <br>
+    <p>See you soon on <a href="{{ url }}">{{ url }}</a></p>
+</div>
