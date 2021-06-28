@@ -12,9 +12,10 @@ spl_autoload_extensions(".php");
 
 spl_autoload_register(function ($fullQualifiedClassName) {
     $parts = explode('\\', $fullQualifiedClassName);
-    // remove first element (\Blexr)
+    // remove root folder
     unset($parts[0]);
     $classPath = implode("\\", $parts);
 
+    // concat proper fodler (/src)
     include_once __DIR__ . "\\src\\$classPath.php";
 });

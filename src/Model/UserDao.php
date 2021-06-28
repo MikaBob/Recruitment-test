@@ -9,9 +9,9 @@ class UserDAO extends AbstractDAO {
     protected $tableName = 'user';
 
     public function insert(User $user) {
-        $query = $this->dbConnection->prepare(""
-                . "INSERT INTO $this->tableName (firstName, lastName, email, creationDate, password, dynamicFields) "
-                . "VALUES (:firstName, :lastName, :email, :creationDate, :password, :dynamicFields)");
+        $query = $this->dbConnection->prepare(''
+                . 'INSERT INTO $this->tableName (firstName, lastName, email, creationDate, password, dynamicFields) '
+                . 'VALUES (:firstName, :lastName, :email, :creationDate, :password, :dynamicFields)');
 
         $query->execute([
             ':firstName' => $user->getFirstName(),
@@ -26,9 +26,9 @@ class UserDAO extends AbstractDAO {
     }
 
     public function update(User $user) {
-        $query = $this->dbConnection->prepare(""
-                . "UPDATE $this->tableName SET firstName = :firstName, lastName = :lastName, email = :email, dynamicFields = :dynamicFields "
-                . "WHERE id = :id");
+        $query = $this->dbConnection->prepare(''
+                . 'UPDATE $this->tableName SET firstName = :firstName, lastName = :lastName, email = :email, dynamicFields = :dynamicFields '
+                . 'WHERE id = :id');
 
         $query->execute([
             ':firstName' => $user->getFirstName(),
@@ -52,7 +52,7 @@ class UserDAO extends AbstractDAO {
 
     public function getByEmail($email): ?User {
         if (is_string($email) && $email !== '') {
-            $query = $this->dbConnection->prepare("SELECT * FROM $this->tableName WHERE email = :email");
+            $query = $this->dbConnection->prepare('SELECT * FROM $this->tableName WHERE email = :email');
             $query->execute([':email' => $email]);
 
             $result = $query->fetch(\PDO::FETCH_OBJ);

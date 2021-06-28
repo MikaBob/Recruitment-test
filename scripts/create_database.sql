@@ -1,68 +1,29 @@
--- phpMyAdmin SQL Dump
--- version 5.0.4
--- https://www.phpmyadmin.net/
---
--- Hôte : 127.0.0.1
--- Généré le : ven. 25 juin 2021 à 15:37
--- Version du serveur :  10.4.17-MariaDB
--- Version de PHP : 8.0.1
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
-SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de données : `blexr`
+-- Table structure for table `user`
 --
-CREATE DATABASE IF NOT EXISTS `blexr` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `blexr`;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `user`
---
-
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
-  `id` int(11) NOT NULL,
-  `first_name` varchar(255) DEFAULT NULL,
-  `last_name` varchar(255) DEFAULT NULL,
-  `username` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `salt` int(11) NOT NULL,
-  `creation_date` datetime NOT NULL,
-  `last_login` datetime DEFAULT NULL,
-  `dynamic_fields` text DEFAULT NULL
+    `id` int(11) NOT NULL,
+    `firstName` varchar(255) DEFAULT NULL,
+     `lastName` varchar(255) DEFAULT NULL,
+     `email` varchar(255) NOT NULL,
+     `password` varchar(255) NOT NULL,
+     `creationDate` datetime NOT NULL,
+    `lastLogin` datetime DEFAULT NULL,
+     `dynamicFields` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Index pour les tables déchargées
---
 
---
--- Index pour la table `user`
---
+INSERT INTO `user` (`id`, `firstName`, `lastName`, `email`, `password`, `creationDate`, `lastLogin`, `dynamicFields`) VALUES
+(1, 'admin', 'admin', 'admin@blexr.com', '$2y$10$ztxJP7yjWVTe0Mv/YJgxVeINRrQJnS.ZVpGjmSo7Jn4NxUjptTQS2', '2021-06-01 13:40:17', '0000-00-00 00:00:00', NULL);
+
+
 ALTER TABLE `user`
-  ADD PRIMARY KEY (`id`);
+    ADD PRIMARY KEY (`id`);
 
---
--- AUTO_INCREMENT pour les tables déchargées
---
-
---
--- AUTO_INCREMENT pour la table `user`
---
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
