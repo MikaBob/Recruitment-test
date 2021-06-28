@@ -11,7 +11,6 @@ class AuthenticationController extends DefaultController {
      */
     public function index() {
         $error = null;
-
         echo $this->twig->render('Authentication/login.html.twig', ['error' => $error]);
     }
 

@@ -67,6 +67,7 @@ class UserController extends DefaultController {
                         $errors[] = $mailer->getError();
                     }
                 } else {
+
                     $errors[] = $result->errorInfo();
                 }
             } catch (\PDOException $ex) {

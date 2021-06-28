@@ -8,9 +8,9 @@ class UserDAO extends AbstractDAO {
 
     protected $tableName = 'user';
 
-    public function insert(User $user) {
+    public function insert(User $user): \PDOStatement {
         $query = $this->dbConnection->prepare(''
-                . 'INSERT INTO $this->tableName (firstName, lastName, email, creationDate, password, dynamicFields) '
+                . 'INSERT INTO `' . $this->tableName . '` (firstName, lastName, email, creationDate, password, dynamicFields) '
                 . 'VALUES (:firstName, :lastName, :email, :creationDate, :password, :dynamicFields)');
 
         $query->execute([
@@ -25,9 +25,9 @@ class UserDAO extends AbstractDAO {
         return $query;
     }
 
-    public function update(User $user) {
+    public function update(User $user): \PDOStatement {
         $query = $this->dbConnection->prepare(''
-                . 'UPDATE $this->tableName SET firstName = :firstName, lastName = :lastName, email = :email, dynamicFields = :dynamicFields '
+                . 'UPDATE `' . $this->tableName . '` SET firstName = :firstName, lastName = :lastName, email = :email, dynamicFields = :dynamicFields '
                 . 'WHERE id = :id');
 
         $query->execute([
@@ -35,6 +35,16 @@ class UserDAO extends AbstractDAO {
             ':lastName' => $user->getLastName(),
             ':email' => $user->getEmail(),
             ':dynamicFields' => json_encode($user->getDynamicFields()),
+            ':id' => $user->getId()
+        ]);
+
+        return $query;
+    }
+
+    public function delete(User $user) {
+        $query = $this->dbConnection->prepare('DELETE FROM`' . $this->tableName . '` WHERE id = :id');
+
+        $query->execute([
             ':id' => $user->getId()
         ]);
 
@@ -52,7 +62,7 @@ class UserDAO extends AbstractDAO {
 
     public function getByEmail($email): ?User {
         if (is_string($email) && $email !== '') {
-            $query = $this->dbConnection->prepare('SELECT * FROM $this->tableName WHERE email = :email');
+            $query = $this->dbConnection->prepare('SELECT * FROM `' . $this->tableName . '` WHERE email = :email');
             $query->execute([':email' => $email]);
 
             $result = $query->fetch(\PDO::FETCH_OBJ);

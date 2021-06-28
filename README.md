@@ -2,7 +2,7 @@
 Stand alone browser based app for tracking remote and on-site employee
 
 # Requirements
-- PHP 7 +  activate the pdo extension
+- PHP >=7.4 +  activate the pdo extension
 - MySQL
 - [Composer](https://getcomposer.org/download/)
 - For local environement, a virtual host is required. The domain must be a simple url like mydomain.com (no localhost/path/to/project)
@@ -15,6 +15,10 @@ After cloning the project and arrange a virtual host:
 - Rename `.env.example` to .env and edit the environement vars.
 
 - To create the database run `php ./scripts/create_database.php` or simply create a database manually and import the create_datase.sql file into. (Admin's password is 'admin' by default)
+
+# Tests
+To run the phpunit test, we have to specify the bootstrap:
+`./vendor/bin/phpunit --bootstrap .\Autoloader.php src/Tests`
 
 # Explaination
 ## Bootstrap and Routing

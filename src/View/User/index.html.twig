@@ -98,34 +98,35 @@
                 type: 'GET',
 
                 success: function(data) {
-                    if(data.status !== 200) {
-                        $('#alert').text('Error: ' + data.error);
-                        $('#alert').fadeIn();
-                        setTimeout(()=>{
-                            $('#alert').text('');
-                            $('#alert').fadeOut();
-                        }, 3000);
-                    } else {
-                        let user = data.user;
+                    let user = data.user;
 
-                        $('#modalTitle').text('Edit user ' + user.email);
-                        $('#modalForm #userId').val(user.id);
-                        $('#modalForm #firstName').val(user.firstName);
-                        $('#modalForm #lastName').val(user.lastName);
-                        $('#modalForm #email').val(user.email);
-                        if(user.dynamicFields !== null){
-                            $('#modalForm #dynamicFields_MOL').prop("checked", (typeof user.dynamicFields.MOL !== 'undefined') ? user.dynamicFields.MOL : false);
-                            $('#modalForm #dynamicFields_EAG').prop("checked", (typeof user.dynamicFields.EAG !== 'undefined') ? user.dynamicFields.EAG : false);
-                            $('#modalForm #dynamicFields_GRG').prop("checked", (typeof user.dynamicFields.GRG !== 'undefined') ? user.dynamicFields.GRG : false);
-                            $('#modalForm #dynamicFields_JAG').prop("checked", (typeof user.dynamicFields.JAG !== 'undefined') ? user.dynamicFields.JAG : false);
-                        } else {
-                            $('#modalForm #dynamicFields_MOL').prop("checked", false);
-                            $('#modalForm #dynamicFields_EAG').prop("checked", false);
-                            $('#modalForm #dynamicFields_GRG').prop("checked", false);
-                            $('#modalForm #dynamicFields_JAG').prop("checked", false);
-                        }
-                        $('#modalCenter').modal('show');
+                    $('#modalTitle').text('Edit user ' + user.email);
+                    $('#modalForm #userId').val(user.id);
+                    $('#modalForm #firstName').val(user.firstName);
+                    $('#modalForm #lastName').val(user.lastName);
+                    $('#modalForm #email').val(user.email);
+
+                    if(user.dynamicFields !== null){
+                        $('#modalForm #dynamicFields_MOL').prop("checked", (typeof user.dynamicFields.MOL !== 'undefined') ? user.dynamicFields.MOL : false);
+                        $('#modalForm #dynamicFields_EAG').prop("checked", (typeof user.dynamicFields.EAG !== 'undefined') ? user.dynamicFields.EAG : false);
+                        $('#modalForm #dynamicFields_GRG').prop("checked", (typeof user.dynamicFields.GRG !== 'undefined') ? user.dynamicFields.GRG : false);
+                        $('#modalForm #dynamicFields_JAG').prop("checked", (typeof user.dynamicFields.JAG !== 'undefined') ? user.dynamicFields.JAG : false);
+                    } else {
+                        $('#modalForm #dynamicFields_MOL').prop("checked", false);
+                        $('#modalForm #dynamicFields_EAG').prop("checked", false);
+                        $('#modalForm #dynamicFields_GRG').prop("checked", false);
+                        $('#modalForm #dynamicFields_JAG').prop("checked", false);
                     }
+                    $('#modalCenter').modal('show');
+                },
+                error: function (xhr, errorType, httpError){
+                    let data = xhr.responseJSON;
+                    $('#alert').text('Error: ' + data);
+                    $('#alert').fadeIn();
+                    setTimeout(()=>{
+                        $('#alert').text('');
+                        $('#alert').fadeOut();
+                    }, 3000);
                 }
             });
         }
@@ -152,16 +153,18 @@
                 type: 'POST',
 
                 success: function(data) {
-                    if(data.status !== 200) {
-                        $('#modalAlert').text('Error: ' + data.error);
-                        $('#modalAlert').fadeIn();
-                        setTimeout(()=>{
-                            $('#modalAlert').text('');
-                            $('#modalAlert').fadeOut();
-                        }, 3000);
-                    } else {
-                        $('#modalCenter').modal('hide');
-                    }
+                    $('#modalCenter').modal('hide');
+                    /** @TODO Refresh table */
+                    /** @TODO Empty modal */
+                },
+                error: function (xhr, errorType, httpError){
+                    let data = xhr.responseJSON;
+                    $('#modalAlert').text('Error: ' + data);
+                    $('#modalAlert').fadeIn();
+                    setTimeout(()=>{
+                        $('#modalAlert').text('');
+                        $('#modalAlert').fadeOut();
+                    }, 3000);
                 }
             });
 

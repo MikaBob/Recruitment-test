@@ -66,10 +66,14 @@ class Router {
         return "Blexr\\Controller\\{$controllerName}Controller";
     }
 
-    public static function generateUrl($controllerName, $action) {
+    public static function generateUrl($controllerName, $action, ...$params) {
         $fullQualifiedClassName = self::getControllerFullQualifiedName($controllerName);
         if (class_exists($fullQualifiedClassName, true) && method_exists($fullQualifiedClassName, $action)) {
-            return 'http://' . filter_input(INPUT_SERVER, 'SERVER_NAME', FILTER_VALIDATE_DOMAIN) . "/{$controllerName}/$action";
+            $urlString = "/{$controllerName}/$action";
+            foreach ($params as $param) {
+                $urlString .= '/' . $param;
+            }
+            return $urlString;
         }
         return null;
     }
