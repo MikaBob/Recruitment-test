@@ -19,10 +19,10 @@ class UserDAO extends AbstractDAO {
             ':email' => $user->getEmail(),
             ':creationDate' => $user->getCreationDate()->format('c'),
             ':password' => $user->getPassword(),
-            ':dynamicFields' => json_encode($user->getDynamicFields()),
+            ':dynamicFields' => json_encode($user->getDynamicFields())
         ]);
 
-        return $query->fetchAll();
+        return $query;
     }
 
     public function update(User $user) {
@@ -38,14 +38,14 @@ class UserDAO extends AbstractDAO {
             ':id' => $user->getId()
         ]);
 
-        return $query->fetchAll();
+        return $query;
     }
 
     public function getById($id): ?User {
         $obj = parent::getById($id);
 
         if ($obj !== false) {
-            $this->fromObjToUser($obj);
+            return $this->fromObjToUser($obj);
         }
         return null;
     }

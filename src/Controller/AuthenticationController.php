@@ -32,7 +32,8 @@ class AuthenticationController extends DefaultController {
             if ($user !== null) {
                 if (password_verify($password, $user->getPassword())) {
                     $user->setLastLogin(new \DateTime());
-                    $userDAO->update($user);
+                    $userDAO->update($user);/** @TODO check that SQL went well */
+                    // Do not show users's password
                     $user->setPassword('');
                     return json_encode(['status' => 200, 'user' => $user]);
                 }

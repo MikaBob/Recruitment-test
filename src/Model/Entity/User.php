@@ -2,7 +2,7 @@
 
 namespace Blexr\Model\Entity;
 
-use Blexr\Model\UserAbstract;
+use Blexr\Model\Entity\UserAbstract;
 
 class User extends UserAbstract implements \JsonSerializable {
 

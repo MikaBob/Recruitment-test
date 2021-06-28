@@ -22,6 +22,7 @@ abstract class DefaultController {
             'cache' => "../../tmp/cache",
             'auto_reload' => true // disable cache (for dev)
         );
+
         $this->twig = new Twig_Environment($loader, $params);
         $this->twig->addExtension(new IntlExtension());
     }

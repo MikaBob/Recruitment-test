@@ -4,6 +4,15 @@ namespace Blexr;
 
 class Router {
 
+    /**
+     * Parse Uri of type/ControllerName/ActionName/param1/param2/...
+     *
+     * Call controller and print its response.
+     *
+     * Default controller is AuthenticationController
+     * Default action is index
+     *
+     */
     public static function handleRequest() {
         $request = self::parseUri();
         if (!empty($request)) {
@@ -12,7 +21,7 @@ class Router {
             $action = $request['action'];
             $params = $request['params'];
 
-            // will call autoloader if class not already loaded.
+            // class_exists()  will call the autoloader if class not already loaded.
             if (class_exists($fullQualifiedClassName, true)) {
                 if (method_exists($fullQualifiedClassName, $action)) {
 
@@ -34,12 +43,16 @@ class Router {
         $path = explode('/', filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_SPECIAL_CHARS));
         $params = [];
 
+        // If there are params in the url, after the action
         if (count($path) > 3) {
+            // starting from 3 to skip Controller name and Action name
             for ($i = 3; $i < count($path); $i++) {
                 $params[] = $path[$i];
             }
         }
 
+
+        // Default Controller and action are Authentication and index
         $request = [
             'controller' => empty($path[1]) ? 'Authentication' : ucfirst($path[1]),
             'action' => empty($path[2]) ? 'index' : $path[2],

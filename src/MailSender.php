@@ -5,14 +5,14 @@ namespace Blexr;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 
+/**
+ * From https://github.com/PHPMailer/PHPMailer
+ */
 class MailSender {
 
     private $mailer;
     private $error;
 
-    /**
-     * From https://github.com/PHPMailer/PHPMailer
-     */
     public function __construct() {
         $this->mailer = new PHPMailer(true);
 

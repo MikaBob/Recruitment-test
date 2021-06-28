@@ -4,21 +4,20 @@ namespace Blexr\Controller;
 
 use Blexr\Model\Entity\User;
 use Blexr\Model\UserDAO;
-use Blexr\Router;
 
 class UserAPIController {
 
     public function get($params) {
         header("Content-Type: application/json; charset=UTF-8");
 
-        if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) !== "GET") {
+        $id = $params[0];
+
+        if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) !== "GET" || !is_numeric($id)) {
             return json_encode(['status' => 400, 'error' => 'Bad Request']);
         }
 
-        $id = $params[0];
-
         $userDAO = new UserDAO();
-        $user = $userDAO->getById($id);
+        $user = $userDAO->getById(intval($id));
 
         if ($user === null) {
             return json_encode(['status' => 404, 'error' => 'User not found']);
@@ -33,14 +32,14 @@ class UserAPIController {
     public function post($params) {
         header("Content-Type: application/json; charset=UTF-8");
 
-        if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) !== "POST") {
+        $id = $params[0];
+
+        if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) !== "POST" || !is_numeric($id)) {
             return json_encode(['status' => 400, 'error' => 'Bad Request']);
         }
 
-        $id = $params[0];
-
         $userDAO = new UserDAO();
-        $user = $userDAO->getById($id);
+        $user = $userDAO->getById(intval($id));
 
         if ($user === null) {
             return json_encode(['status' => 404, 'error' => 'User not found']);
@@ -69,7 +68,12 @@ class UserAPIController {
             $user->setDynamicFieldGitRepository($isGRGGranted);
             $user->setDynamicFieldJira($isJAGGranted);
 
-            $userDAO->update($user);
+            $result = $userDAO->update($user);
+            if ($result->errorCode() !== \PDO::ERR_NONE) {
+                return json_encode(['status' => 400, 'error' => $result->errorInfo()]);
+            }
+        } catch (\PDOException $ex) {
+            $errors[] = $ex->getMessage();
         } catch (\TypeError $error) {
             $errors[] = $error->getMessage();
         }

@@ -23,7 +23,7 @@ abstract class AbstractDAO {
             $query->execute([':id' => $id]);
             return $query->fetch(\PDO::FETCH_OBJ);
         }
-        return null;
+        return false;
     }
 
 }

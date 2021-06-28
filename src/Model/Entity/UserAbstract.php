@@ -1,6 +1,6 @@
 <?php
 
-namespace Blexr\Model;
+namespace Blexr\Model\Entity;
 
 abstract class UserAbstract {
 
