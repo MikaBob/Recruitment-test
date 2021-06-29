@@ -58,13 +58,21 @@ class RequestAPIController extends DefaultAPIController {
         }
 
         try {
-
             /**
              * @TODO make real validation with constraints
              */
             $userId = $_SERVER['loggedUser']->getId();
-            $startDate = \DateTime::createFromFormat('U', filter_input(INPUT_POST, 'startDate', FILTER_SANITIZE_STRING));
-            $endDate = \DateTime::createFromFormat('U', filter_input(INPUT_POST, 'endDate', FILTER_SANITIZE_STRING));
+            $startDate = \DateTime::createFromFormat('D M d Y H:i:s e+', filter_input(INPUT_POST, 'startDate', FILTER_SANITIZE_STRING));
+            $endDate = \DateTime::createFromFormat('D M d Y H:i:s e+', filter_input(INPUT_POST, 'endDate', FILTER_SANITIZE_STRING));
+
+            $now = new \Datetime();
+            $deadline = new \DateTime($startDate->format(\DateTime::ISO8601));
+            $deadline->sub(new \DateInterval('P1D'));
+            $deadline->setTime(20, 0, 0);
+
+            if ($now->getTimestamp() > $deadline->getTimestamp()) {
+                return $this->generateResponse(400, 'Your starting date is too early. It can not be approuved so quick');
+            }
 
             $request = new Request();
             $request->setUserId($userId);

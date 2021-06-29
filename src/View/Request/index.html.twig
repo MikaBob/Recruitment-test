@@ -105,7 +105,6 @@
                     type: 'GET',
 
                     success: function(data) {
-
                         $('#requestList').html('');
                         data.requests.forEach((request) => {
                             requests[request.id] = request;
@@ -118,7 +117,7 @@
                             if(request.status === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_PENDING') }}'){
                             {% if isAdmin %}
                                 tableRow += "<td class=\"text-center\"><button class=\"btn btn-danger\" onclick=\"updateRequest("+request.id+", '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_REJECTED') }}')\">Reject</button>\n";
-                                tableRow += "<button class=\"btn btn-success\" onclick=\"updateRequest("+request.id+", '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_ACCEPTED') }}')\">Accept</button>\n\</td>\n";
+                                tableRow += "<button class=\"btn btn-success\" onclick=\"updateRequest("+request.id+", '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_APPROUVED') }}')\">Approuve</button>\n\</td>\n";
                             {% else %}
                                 tableRow += "<td class=\"text-center\"><button class=\"btn btn-danger\" onclick=\"deleteRequest("+request.id+")\">Cancel</button>\n";
                             {% endif%}
@@ -163,8 +162,8 @@
             };
 
             updateRequest = function(requestId, newStatus) {
-                if(newStatus === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_ACCEPTED') }}') {
-                    openModal(requestId, '<b class="text-success">accept</b>');
+                if(newStatus === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_APPROUVED') }}') {
+                    openModal(requestId, '<b class="text-success">approuve</b>');
                 } else if(newStatus === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_REJECTED') }}') {
                     openModal(requestId, '<b class="text-danger">reject</b>');
                 } else {
@@ -199,11 +198,24 @@
                     return false;
                 }
 
-                var data = {
-                    'startDate' : startDate.getTime()/1000,
-                    'endDate' : endDate.getTime()/1000
-                };
+                let now = new Date();
+                let deadline = new Date(startDate);
 
+                deadline.setDate(deadline.getDate() - 1);
+                deadline.setHours(20);
+                deadline.setMinutes(0);
+                deadline.setSeconds(0);
+
+                if(now > deadline){
+                    showError('#alert', 'Error: Your starting date is too early. It can not be approuved so quick');
+                    return false;
+                }
+
+                var data = {
+                    'startDate' : startDate.toString(),
+                    'endDate' : endDate.toString()
+                };
+                console.log(startDate, endDate);
                 $.ajax({
                     url: "/requestAPI/post/",
                     async: true,
@@ -212,8 +224,8 @@
 
                     success: function(data) {
                         refreshRequestList();
-                        $('#createRequestForm #startDate').val('');
-                        $('#createRequestForm #endDate').val('');
+                        //$('#createRequestForm #startDate').val('');
+                        //$('#createRequestForm #endDate').val('');
                     },
 
                     error: function (xhr){
@@ -233,7 +245,6 @@
                     $(element).fadeOut();
                 }, 3000);
             }
-
 
             refreshRequestList();
         });
