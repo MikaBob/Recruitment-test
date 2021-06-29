@@ -66,10 +66,9 @@ class RequestDAO extends AbstractDAO {
         $request = new Request();
         $request->setId($obj->id);
         $request->setUserId($obj->userId);
-        $request->setStartDate($obj->startDate);
-        $request->setEndDate($obj->endDate);
+        $request->setStartDate(new \DateTime($obj->startDate));
+        $request->setEndDate(new \DateTime($obj->endDate));
         $request->setStatus($obj->status);
-
         return $request;
     }
 

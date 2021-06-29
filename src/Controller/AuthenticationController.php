@@ -52,6 +52,7 @@ class AuthenticationController extends DefaultController {
             }
         }
 
+        http_response_code(400);
         return json_encode(['status' => 400, 'error' => 'Invalid credidentials']);
     }
 

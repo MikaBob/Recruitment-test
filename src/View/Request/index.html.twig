@@ -43,20 +43,17 @@
     <div class="modal fade" id="modalCenter" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <form id="modalForm" onsubmit="return saveChanges();">
-                    <input id="requestId" name="requestId" type="hidden" value=""/>
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle"></h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body"></div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                        <button type="submit" class="btn btn-primary">Yes</button>
-                    </div>
-                </form>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">Are you sure you want to <span id="modalBoldTextAction"></span> this request ?<br><br>This action is definitive !</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                    <button type="submit" id="modalAction" class="btn btn-primary">Yes</button>
+                </div>
             </div>
         </div>
     </div>
@@ -64,23 +61,42 @@
 
     <script type="text/javascript">
         $( document ).ready(function() {
+            var requests = [];
             {% if isAdmin %}
+            var users = [];
+            getUsers = function() {
                 $.ajax({
                     url: "/userAPI/list/",
-                    async: true,
+                    async: false,
                     type: 'GET',
 
                     success: function(data) {
-                        // @TODO change request userId with email
-                        console.log(data);
+                        data.users.forEach((user) => {
+                            users[user.id] = user;
+                        });
                     },
-                    error: function (xhr, errorType, httpError){
+                    error: function (xhr){
                         $('#alert').text('Error: Could not load list of users');
                         $('#alert').fadeIn();
                     }
                 });
-            {% endif%}
+            };
 
+            showUserEmail = function(){
+                if(users.length === 0) {
+                    getUsers();
+                }
+
+                $('tr.requestRow td[data-userId]').each((index , element) => {
+                    let userId = $(element).attr('data-userId');
+                    users.forEach((user) => {
+                        if(user.id === userId){
+                            $(element).html(user.email);
+                        }
+                    });
+                });
+            };
+            {% endif%}
 
             refreshRequestList = function(){
                 $.ajax({
@@ -89,31 +105,89 @@
                     type: 'GET',
 
                     success: function(data) {
+
                         $('#requestList').html('');
                         data.requests.forEach((request) => {
-                            $('#requestList').append("\n\
-                                <tr class=\"requestRow\" scope=\"row\" data-requestId=\""+ request.id +"\">\n\
-                                    {% if isAdmin %}<td>"+request.userId+"</td>\n\ {% endif %}
-                                    <td>"+request.startDate+"</td>\n\
-                                    <td>"+request.endDate+"</td>\n\
-                                    <td>"+request.status+"</td>\n\
-                                    <td><button onclick=\"openModal("+request.id+")\">Delete</button></td>\n\
-                                </tr>\n\
-                            ");
+                            requests[request.id] = request;
+                            let tableRow = "";
+                            tableRow += "<tr class=\"requestRow\" scope=\"row\" data-requestId=\""+ request.id +"\">\n";
+                            {% if isAdmin %}tableRow += "<td data-userId=\""+request.userId+"\"></td>\n"; {% endif %}
+                            tableRow += "<td>"+request.startDate+"</td>\n";
+                            tableRow += "<td>"+request.endDate+"</td>\n";
+                            tableRow += "<td>"+request.status+"</td>\n";
+                            if(request.status === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_PENDING') }}'){
+                            {% if isAdmin %}
+                                tableRow += "<td class=\"text-center\"><button class=\"btn btn-danger\" onclick=\"updateRequest("+request.id+", '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_REJECTED') }}')\">Reject</button>\n";
+                                tableRow += "<button class=\"btn btn-success\" onclick=\"updateRequest("+request.id+", '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_ACCEPTED') }}')\">Accept</button>\n\</td>\n";
+                            {% else %}
+                                tableRow += "<td class=\"text-center\"><button class=\"btn btn-danger\" onclick=\"deleteRequest("+request.id+")\">Cancel</button>\n";
+                            {% endif%}
+                                } else {
+                                tableRow += "<td />";
+                            }
+                            tableRow += "</tr>\n";
+                            $('#requestList').append(tableRow);
                         });
+                        {% if isAdmin %}showUserEmail();{% endif%}
                     },
-                    error: function (xhr, errorType, httpError){
+                    error: function (){
                         showError('#alert', 'Error: Could not load list of requests');
                     }
                 });
             };
 
-            openModal = function(requestId) {
-                console.log('open modal');
+            openModal = function(requestId, content) {
+                let request = requests[requestId];
+                $('#modalTitle').text('Request ' + request.id{% if isAdmin %}+ ' of '+users[request.userId].email{% endif %});
+                $('#modalBoldTextAction').html(content);
+                $('#modalCenter').modal('show');
             };
 
-            saveChanges = function() {
-                console.log('save change');
+            deleteRequest = function(requestId) {
+                openModal(requestId, '<b class="text-danger">delete</b>');
+                $('#modalAction').click(()=>{
+                    $.ajax({
+                        url: "/requestAPI/delete/"+requestId,
+                        async: true,
+                        type: 'DELETE',
+
+                        error: function (xhr){
+                            let data = xhr.responseJSON;
+                            showError('#alert', 'Error: ' + data);
+                        }
+                    }).always(() => {
+                        $('#modalCenter').modal('hide');
+                        refreshRequestList();
+                    });
+                });
+            };
+
+            updateRequest = function(requestId, newStatus) {
+                if(newStatus === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_ACCEPTED') }}') {
+                    openModal(requestId, '<b class="text-success">accept</b>');
+                } else if(newStatus === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_REJECTED') }}') {
+                    openModal(requestId, '<b class="text-danger">reject</b>');
+                } else {
+                    // should never happened, but just in case x)
+                    showError('#alert', 'Error: unknown request status '+newStatus);
+                }
+
+                $('#modalAction').click(()=>{
+                    $.ajax({
+                        url: "/requestAPI/put/"+requestId,
+                        async: true,
+                        data: { status : newStatus},
+                        type: 'POST',
+
+                        error: function (xhr){
+                            let data = xhr.responseJSON;
+                            showError('#alert', 'Error: ' + data);
+                        }
+                    }).always(() => {
+                        $('#modalCenter').modal('hide');
+                        refreshRequestList();
+                    });
+                });
             };
 
             createRequest = function() {
@@ -142,7 +216,7 @@
                         $('#createRequestForm #endDate').val('');
                     },
 
-                    error: function (xhr, errorType, httpError){
+                    error: function (xhr){
                         let data = xhr.responseJSON;
                         showError('#alert', 'Error: ' + data);
                     }

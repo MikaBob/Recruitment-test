@@ -23,6 +23,15 @@ class RequestAPIController extends DefaultAPIController {
             return $this->generateResponse(400, $result->errorInfo());
         }
 
+        if (!AuthenticationController::isAdmin()) {
+            $filteredResult = [];
+            foreach ($result as $request) {
+                if (intval($request->userId) === $_SERVER['loggedUser']->getId())
+                    $filteredResult[] = $request;
+            }
+            $result = $filteredResult;
+        }
+
         return $this->generateResponse(200, ['requests' => $result]);
     }
 
@@ -68,10 +77,83 @@ class RequestAPIController extends DefaultAPIController {
             if ($result->errorCode() !== \PDO::ERR_NONE) {
                 return $this->generateResponse(400, $result->errorInfo());
             }
-        } catch (\PDOException $ex) {
-            return $this->generateResponse(400, $ex->getMessage());
         } catch (\TypeError $error) {
             return $this->generateResponse(400, $error->getMessage());
+        } catch (\Exception $ex) {
+            return $this->generateResponse(400, $ex->getMessage());
+        }
+
+        return $this->generateResponse(200, []);
+    }
+
+    public function put($params) {
+        $id = $params[0] ?? null;
+
+        if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) !== "POST" || !is_numeric($id)) {
+            return $this->generateResponse(400, 'Bad Request');
+        }
+
+        try {
+
+            $requestDAO = new RequestDAO();
+            $request = $requestDAO->getById(intval($id));
+
+            if ($request === null) {
+                return $this->generateResponse(400, 'Request not found');
+            }
+
+            $userId = $_SERVER['loggedUser']->getId();
+
+            if (!AuthenticationController::isAdmin() && $userId !== $request->getUserId()) {
+                return $this->generateResponse(403, 'Forbidden');
+            }
+
+            $status = filter_input(INPUT_POST, 'status', FILTER_SANITIZE_STRING);
+
+            if (!Request::isStatusValid($status) || $request->getStatus() !== Request::STATUS_PENDING) {
+                return $this->generateResponse(400, 'Bad Request');
+            }
+
+            $request->setStatus($status);
+            $result = $requestDAO->update($request);
+
+            if ($result->errorCode() !== \PDO::ERR_NONE) {
+                return $this->generateResponse(400, $result->errorInfo());
+            }
+        } catch (\TypeError $error) {
+            return $this->generateResponse(400, $error->getMessage());
+        } catch (\Exception $ex) {
+            return $this->generateResponse(400, $ex->getMessage());
+        }
+
+        return $this->generateResponse(200, []);
+    }
+
+    public function delete($params) {
+        $id = $params[0] ?? null;
+
+        if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) !== "DELETE" || !is_numeric($id)) {
+            return $this->generateResponse(400, 'Bad Request');
+        }
+
+        try {
+
+            $requestDAO = new RequestDAO();
+            $request = $requestDAO->getById(intval($id));
+            if ($request === null) {
+                return $this->generateResponse(400, 'Request not found');
+            }
+
+            $userId = $_SERVER['loggedUser']->getId();
+
+            if (!AuthenticationController::isAdmin() && $userId !== $request->getUserId()) {
+                return $this->generateResponse(403, 'Forbidden');
+            }
+
+            $result = $requestDAO->delete($request);
+            if ($result->errorCode() !== \PDO::ERR_NONE) {
+                return $this->generateResponse(400, $result->errorInfo());
+            }
         } catch (\Exception $ex) {
             return $this->generateResponse(400, $ex->getMessage());
         }

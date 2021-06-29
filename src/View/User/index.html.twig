@@ -4,8 +4,9 @@
 
 {% block content %}
     <h2>User list</h2>
-    <div class="my-1 float-end">
-        <a href="/user/create" class="btn btn-outline-primary btn">Add new user</a>
+    <div class="my-1">
+        <span class="text-secondary">Click on a line to edit user</span>
+        <span class="float-end"><a href="/user/create" class="btn btn-outline-primary btn">Add new user</a></span>
     </div>
     <div id="alert" class="alert alert-danger alert-dismissible" style="display: none;" role="alert"></div>
     <table class="table table-striped table-hover table-bordered">
@@ -94,6 +95,7 @@
 
                     success: function(data) {
                         $('#userList').html('');
+
                         data.users.forEach((user) => {
                             $('#userList').append("\n\
                                 <tr class=\"userRow\" scope=\"row\" data-userId=\""+ user.id +"\">\n\
@@ -108,7 +110,7 @@
                             $('tr.userRow').bind('click', openModal);
                         });
                     },
-                    error: function (xhr, errorType, httpError){
+                    error: function (){
                         $('#alert').text('Error: Could not load list of users');
                         $('#alert').fadeIn();
                     }
@@ -145,7 +147,7 @@
                         }
                         $('#modalCenter').modal('show');
                     },
-                    error: function (xhr, errorType, httpError){
+                    error: function (xhr){
                         let data = xhr.responseJSON;
                         $('#alert').text('Error: ' + data);
                         $('#alert').fadeIn();
@@ -178,12 +180,11 @@
                     data: data,
                     type: 'POST',
 
-                    success: function(data) {
+                    success: function() {
                         $('#modalCenter').modal('hide');
                         refreshUserList();
-                        /** @TODO Empty modal */
                     },
-                    error: function (xhr, errorType, httpError){
+                    error: function (xhr){
                         let data = xhr.responseJSON;
                         $('#modalAlert').text('Error: ' + data);
                         $('#modalAlert').fadeIn();

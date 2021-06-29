@@ -55,7 +55,9 @@
 
                     window.location.pathname = {% if isAdmin %}'/user'{% else %}'/request'{% endif %};
                 },
-                error: function(data) {
+                error: function(xhr) {
+                    let data = xhr.responseJSON;
+
                     $('#alert').text('Error: ' + data.error);
                     $('#alert').fadeIn();
                     setTimeout(()=>{
@@ -69,6 +71,7 @@
         }
 
         function forgottenPassword(){
+            /** @TODO send per email a request to reset password with temporary token in url */
             $('#alert').text('Too bad :/');
             $('#alert').show();
             setTimeout(()=>{

@@ -27,7 +27,7 @@ class Request extends RequestAbstract implements \JsonSerializable {
     private $endDate;
 
     /**
-     * @var STRING
+     * @var string
      */
     private $status;
 
@@ -67,8 +67,12 @@ class Request extends RequestAbstract implements \JsonSerializable {
         $this->endDate = $endDate;
     }
 
-    function setStatus(STRING $status): void {
-        $this->status = $status;
+    function setStatus(string $status): void {
+        if (self::isStatusValid($status)) {
+            $this->status = $status;
+        } else {
+            throw new Exception('Can not set ' . $status . ' as statuts.');
+        }
     }
 
     public function jsonSerialize(): mixed {
