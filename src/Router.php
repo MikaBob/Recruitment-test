@@ -2,6 +2,8 @@
 
 namespace Blexr;
 
+use Blexr\Controller\AuthenticationController;
+
 class Router {
 
     /**
@@ -16,26 +18,34 @@ class Router {
     public static function handleRequest() {
         $request = self::parseUri();
         if (!empty($request)) {
+
             $controllerName = $request['controller'];
             $fullQualifiedClassName = self::getControllerFullQualifiedName($controllerName);
             $action = $request['action'];
             $params = $request['params'];
 
-            // class_exists()  will call the autoloader if class not already loaded.
-            if (class_exists($fullQualifiedClassName, true)) {
-                if (method_exists($fullQualifiedClassName, $action)) {
+            // if want to log in (use AuthenticationController) or already is logged in
+            if ($fullQualifiedClassName === AuthenticationController::class || AuthenticationController::hasValidJWTToken()) {
 
-                    $controller = new $fullQualifiedClassName();
-                    echo call_user_func([$controller, $action], $params);
+                // class_exists()  will call the autoloader if class not already loaded.
+                if (class_exists($fullQualifiedClassName, true)) {
+                    if (method_exists($fullQualifiedClassName, $action)) {
+
+                        $controller = new $fullQualifiedClassName();
+                        echo call_user_func([$controller, $action], $params);
+                    } else {
+                        http_response_code(404);
+                        echo "Page not found 404 : Method $action not found in controller $controllerName";
+                    }
                 } else {
-                    echo "Page not found 404 : Method $action not found in controller $controllerName";
+                    http_response_code(404);
+                    echo "Page not found 404 : Controller $controllerName not found";
                 }
             } else {
-                echo "Page not found 404 : Controller $controllerName not found";
+                echo call_user_func([new AuthenticationController(), 'index']);
             }
         } else {
-            // Default page
-            echo call_user_func(array('Blexr\\Controller\\AuthenticationController', 'index'));
+            echo call_user_func([new AuthenticationController(), 'index']);
         }
     }
 

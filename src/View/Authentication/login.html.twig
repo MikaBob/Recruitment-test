@@ -14,6 +14,7 @@
                 id='username'
                 placeholder='Email'
                 class='form-control'
+                value='admin@blexr.com'
                 />
         </div>
         <div class="form-group">
@@ -23,6 +24,7 @@
                 id='password'
                 placeholder='Password'
                 class='form-control'
+                value='admin'
                 />
         </div>
         <div class="form-group">
@@ -48,14 +50,21 @@
                 type: 'POST',
 
                 success: function(data) {
-                    if(data.status !== 200) {
-                        $('#alert').text('Error: ' + data.error);
-                        $('#alert').fadeIn();
-                        setTimeout(()=>{
-                            $('#alert').text('');
-                            $('#alert').fadeOut();
-                        }, 3000);
-                    }
+                    let payload = parseJwt(data.token);
+                    setCookie('token', data.token, payload.exp);
+
+                    if(location.pathname !== '/')
+                        location.reload(true);
+                    else
+                        window.location.pathname = '/user';
+                },
+                error: function(data) {
+                    $('#alert').text('Error: ' + data.error);
+                    $('#alert').fadeIn();
+                    setTimeout(()=>{
+                        $('#alert').text('');
+                        $('#alert').fadeOut();
+                    }, 3000);
                 }
             });
 
