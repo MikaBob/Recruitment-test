@@ -57,198 +57,220 @@
             </div>
         </div>
     </div>
+{% endblock %}
 
 
-    <script type="text/javascript">
-        $( document ).ready(function() {
-            var requests = [];
-            {% if isAdmin %}
-            var users = [];
-            getUsers = function() {
-                $.ajax({
-                    url: "/userAPI/list/",
-                    async: false,
-                    type: 'GET',
 
-                    success: function(data) {
-                        data.users.forEach((user) => {
-                            users[user.id] = user;
-                        });
-                    },
-                    error: function (xhr){
-                        $('#alert').text('Error: Could not load list of users');
-                        $('#alert').fadeIn();
+{% block javascripts %}
+{{ parent() }}
+<script type="text/javascript">
+    $( document ).ready(function() {
+        var requests = [];
+        {% if isAdmin %}
+        var users = [];
+
+        // get the list of users
+        getUsers = function() {
+            $.ajax({
+                url: "/userAPI/list/",
+                async: false,
+                type: 'GET',
+
+                success: function(data) {
+                    data.users.forEach((user) => {
+                        users[user.id] = user;
+                    });
+                },
+                error: function (){
+                    $('#alert').text('Error: Could not load list of users');
+                    $('#alert').fadeIn();
+                }
+            });
+        };
+
+        // For the table, translate the request.userId to user.email
+        showUserEmail = function(){
+            if(users.length === 0) {
+                getUsers();
+            }
+
+            $('tr.requestRow td[data-userId]').each((index , element) => {
+                let userId = $(element).attr('data-userId');
+                users.forEach((user) => {
+                    if(user.id === userId){
+                        $(element).html(user.email);
                     }
                 });
-            };
+            });
+        };
+        {% endif%}
 
-            showUserEmail = function(){
-                if(users.length === 0) {
-                    getUsers();
-                }
+        // retrieve all user's requests. Admin gets to see everyone's
+        refreshRequestList = function(){
+            $.ajax({
+                url: "/requestAPI/list/",
+                async: true,
+                type: 'GET',
 
-                $('tr.requestRow td[data-userId]').each((index , element) => {
-                    let userId = $(element).attr('data-userId');
-                    users.forEach((user) => {
-                        if(user.id === userId){
-                            $(element).html(user.email);
+                success: function(data) {
+                    $('#requestList').html('');
+                    data.requests.forEach((request) => {
+
+                        requests[request.id] = request;
+                        let tableRow = "";
+                        tableRow += "<tr class=\"requestRow\" scope=\"row\" data-requestId=\""+ request.id +"\">\n";
+                        {% if isAdmin %}tableRow += "<td data-userId=\""+request.userId+"\"></td>\n"; {% endif %}
+                        tableRow += "<td>"+request.startDate+"</td>\n";
+                        tableRow += "<td>"+request.endDate+"</td>\n";
+                        tableRow += "<td>"+request.status+"</td>\n";
+                        if(request.status === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_PENDING') }}'){
+                        {% if isAdmin %}
+                            tableRow += "<td class=\"text-center\"><button class=\"btn btn-danger\" onclick=\"updateRequest("+request.id+", '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_REJECTED') }}')\">Reject</button>\n";
+                            tableRow += "<button class=\"btn btn-success\" onclick=\"updateRequest("+request.id+", '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_APPROUVED') }}')\">Approuve</button>\n\</td>\n";
+                        {% else %}
+                            tableRow += "<td class=\"text-center\"><button class=\"btn btn-danger\" onclick=\"deleteRequest("+request.id+")\">Cancel</button>\n";
+                        {% endif%}
+                            } else {
+                            tableRow += "<td />";
                         }
+                        tableRow += "</tr>\n";
+                        $('#requestList').append(tableRow);
                     });
-                });
-            };
-            {% endif%}
+                    {% if isAdmin %}showUserEmail();{% endif%}
+                },
+                error: function (){
+                    showError('#alert', 'Error: Could not load list of requests');
+                }
+            });
+        };
 
-            refreshRequestList = function(){
+        // prepare and show the modal
+        openModal = function(requestId, content) {
+            let request = requests[requestId];
+            $('#modalTitle').text('Request ' + request.id{% if isAdmin %}+ ' of '+users[request.userId].email{% endif %});
+            $('#modalBoldTextAction').html(content);
+            $('#modalCenter').modal('show');
+        };
+
+        {% if isAdmin %}
+        // Request status update. Admin only
+        updateRequest = function(requestId, newStatus) {
+            // check newStatus value
+            if(newStatus === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_APPROUVED') }}') {
+                openModal(requestId, '<b class="text-success">approuve</b>');
+            } else if(newStatus === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_REJECTED') }}') {
+                openModal(requestId, '<b class="text-danger">reject</b>');
+            } else {
+                // should never happened, but just in case x)
+                showError('#alert', 'Error: unknown request status '+newStatus);
+            }
+
+            $('#modalAction').click(()=>{
                 $.ajax({
-                    url: "/requestAPI/list/",
+                    url: "/requestAPI/put/"+requestId,
                     async: true,
-                    type: 'GET',
-
-                    success: function(data) {
-                        $('#requestList').html('');
-                        data.requests.forEach((request) => {
-
-                            requests[request.id] = request;
-                            let tableRow = "";
-                            tableRow += "<tr class=\"requestRow\" scope=\"row\" data-requestId=\""+ request.id +"\">\n";
-                            {% if isAdmin %}tableRow += "<td data-userId=\""+request.userId+"\"></td>\n"; {% endif %}
-                            tableRow += "<td>"+request.startDate+"</td>\n";
-                            tableRow += "<td>"+request.endDate+"</td>\n";
-                            tableRow += "<td>"+request.status+"</td>\n";
-                            if(request.status === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_PENDING') }}'){
-                            {% if isAdmin %}
-                                tableRow += "<td class=\"text-center\"><button class=\"btn btn-danger\" onclick=\"updateRequest("+request.id+", '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_REJECTED') }}')\">Reject</button>\n";
-                                tableRow += "<button class=\"btn btn-success\" onclick=\"updateRequest("+request.id+", '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_APPROUVED') }}')\">Approuve</button>\n\</td>\n";
-                            {% else %}
-                                tableRow += "<td class=\"text-center\"><button class=\"btn btn-danger\" onclick=\"deleteRequest("+request.id+")\">Cancel</button>\n";
-                            {% endif%}
-                                } else {
-                                tableRow += "<td />";
-                            }
-                            tableRow += "</tr>\n";
-                            $('#requestList').append(tableRow);
-                        });
-                        {% if isAdmin %}showUserEmail();{% endif%}
-                    },
-                    error: function (){
-                        showError('#alert', 'Error: Could not load list of requests');
-                    }
-                });
-            };
-
-            openModal = function(requestId, content) {
-                let request = requests[requestId];
-                $('#modalTitle').text('Request ' + request.id{% if isAdmin %}+ ' of '+users[request.userId].email{% endif %});
-                $('#modalBoldTextAction').html(content);
-                $('#modalCenter').modal('show');
-            };
-
-            deleteRequest = function(requestId) {
-                openModal(requestId, '<b class="text-danger">delete</b>');
-                $('#modalAction').click(()=>{
-                    $.ajax({
-                        url: "/requestAPI/delete/"+requestId,
-                        async: true,
-                        type: 'DELETE',
-
-                        error: function (xhr){
-                            let data = xhr.responseJSON;
-                            showError('#alert', 'Error: ' + data);
-                        }
-                    }).always(() => {
-                        $('#modalCenter').modal('hide');
-                        refreshRequestList();
-                    });
-                });
-            };
-
-            updateRequest = function(requestId, newStatus) {
-                if(newStatus === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_APPROUVED') }}') {
-                    openModal(requestId, '<b class="text-success">approuve</b>');
-                } else if(newStatus === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_REJECTED') }}') {
-                    openModal(requestId, '<b class="text-danger">reject</b>');
-                } else {
-                    // should never happened, but just in case x)
-                    showError('#alert', 'Error: unknown request status '+newStatus);
-                }
-
-                $('#modalAction').click(()=>{
-                    $.ajax({
-                        url: "/requestAPI/put/"+requestId,
-                        async: true,
-                        data: { status : newStatus},
-                        type: 'POST',
-
-                        error: function (xhr){
-                            let data = xhr.responseJSON;
-                            showError('#alert', 'Error: ' + data);
-                        }
-                    }).always(() => {
-                        $('#modalCenter').modal('hide');
-                        refreshRequestList();
-                    });
-                });
-            };
-
-            createRequest = function() {
-                let startDate = new Date($('#createRequestForm #startDate').val());
-                let endDate = new Date($('#createRequestForm #endDate').val());
-
-                if(startDate.toString() === 'Invalid Date' || endDate.toString() === 'Invalid Date' || startDate > endDate) {
-                    showError('#alert', 'Error: Invalid dates');
-                    return false;
-                }
-
-                let now = new Date();
-                let deadline = new Date(startDate);
-
-                deadline.setDate(deadline.getDate() - 1);
-                deadline.setHours(20);
-                deadline.setMinutes(0);
-                deadline.setSeconds(0);
-
-                if(now > deadline){
-                    showError('#alert', 'Error: Your starting date is too early. It can not be approuved so quick');
-                    return false;
-                }
-
-                var data = {
-                    'startDate' : startDate.toString(),
-                    'endDate' : endDate.toString()
-                };
-                console.log(startDate, endDate);
-                $.ajax({
-                    url: "/requestAPI/post/",
-                    async: true,
-                    data: data,
+                    data: { status : newStatus},
                     type: 'POST',
-
-                    success: function(data) {
-                        refreshRequestList();
-                        //$('#createRequestForm #startDate').val('');
-                        //$('#createRequestForm #endDate').val('');
-                    },
 
                     error: function (xhr){
                         let data = xhr.responseJSON;
                         showError('#alert', 'Error: ' + data);
                     }
+                }).always(() => {
+                    $('#modalCenter').modal('hide');
+                    refreshRequestList();
                 });
+            });
+        };
 
+        {% else %}
+        // Request cancelation. User only
+        deleteRequest = function(requestId) {
+            openModal(requestId, '<b class="text-danger">delete</b>');
+            $('#modalAction').click(()=>{
+                $.ajax({
+                    url: "/requestAPI/delete/"+requestId,
+                    async: true,
+                    type: 'DELETE',
+
+                    error: function (xhr){
+                        let data = xhr.responseJSON;
+                        showError('#alert', 'Error: ' + data);
+                    }
+                }).always(() => {
+                    $('#modalCenter').modal('hide');
+                    refreshRequestList();
+                });
+            });
+        };
+
+        // Request creation. User only
+        createRequest = function() {
+            // check dates
+            let startDate = new Date($('#createRequestForm #startDate').val());
+            let endDate = new Date($('#createRequestForm #endDate').val());
+
+            if(startDate.toString() === 'Invalid Date' || endDate.toString() === 'Invalid Date' || startDate > endDate) {
+                showError('#alert', 'Error: Invalid dates');
                 return false;
-            };
-
-            showError = function(element, error) {
-                $(element).text(error);
-                $(element).fadeIn();
-                setTimeout(()=>{
-                    $(element).text('');
-                    $(element).fadeOut();
-                }, 3000);
             }
 
-            refreshRequestList();
-        });
-    </script>
-{% endblock %}
+            // same as backend
+            // check deadline. startDate must be at least 4 hours before the end of the previous day
+            let now = new Date();
+            let deadline = new Date(startDate);
 
+            // deadline = startDate -1 days, 8pm
+            deadline.setDate(deadline.getDate() - 1);
+            deadline.setHours(20);
+            deadline.setMinutes(0);
+            deadline.setSeconds(0);
+
+            if(now > deadline){
+                showError('#alert', 'Error: Your starting date is too early. It can not be approuved so quick');
+                return false;
+            }
+
+            var data = {
+                'startDate' : startDate.toString(),
+                'endDate' : endDate.toString()
+            };
+
+            $.ajax({
+                url: "/requestAPI/post/",
+                async: true,
+                data: data,
+                type: 'POST',
+
+                success: function(data) {
+                    refreshRequestList();
+                    // reset calendars
+                    $('#createRequestForm #startDate').val('');
+                    $('#createRequestForm #endDate').val('');
+                },
+
+                error: function (xhr){
+                    let data = xhr.responseJSON;
+                    showError('#alert', 'Error: ' + data);
+                }
+            });
+
+            return false;
+        };
+        {% endif %}
+
+        /** @TODO make it global */
+        // display error
+        showError = function(element, error) {
+            $(element).text(error);
+            $(element).fadeIn();
+            setTimeout(()=>{
+                $(element).text('');
+                $(element).fadeOut();
+            }, 3000);
+        }
+
+        refreshRequestList();
+    });
+</script>
+{% endblock %}

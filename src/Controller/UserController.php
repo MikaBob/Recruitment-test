@@ -13,8 +13,8 @@ class UserController extends DefaultController {
         echo $this->twig->render('User/index.html.twig');
     }
 
+    // User creation is not done through the API. Just to change a bit =D
     public function create() {
-
         $user = null;
         $errors = [];
 
@@ -42,7 +42,7 @@ class UserController extends DefaultController {
                 $userDAO = new UserDAO();
                 $result = $userDAO->insert($user);
 
-                // If user is created, send email with password
+                // If user is created, send email with his first password
                 if ($result->errorCode() === \PDO::ERR_NONE) {
                     $mailer = new MailSender();
                     $isMailSend = $mailer->sendMail(
@@ -58,6 +58,7 @@ class UserController extends DefaultController {
                     if ($isMailSend) {
                         header('Location: ' . Router::generateUrl('user', 'index'));
                     } else {
+                        /** @TODO Email not send, so user do not have his password. We shoud do something */
                         $errors[] = $mailer->getError();
                     }
                 } else {

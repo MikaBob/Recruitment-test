@@ -17,7 +17,7 @@ class AuthenticationController extends DefaultController {
     }
 
     /**
-     * Ajax call to receive token
+     * Generate and send back an access token (if credentials are valid of course)
      */
     public function login($params) {
         header("Content-Type: application/json; charset=UTF-8");
@@ -27,6 +27,9 @@ class AuthenticationController extends DefaultController {
             return json_encode(['status' => 400, 'error' => 'Bad Request']);
         }
 
+        /**
+         * @TODO make real validation
+         */
         $email = filter_input(INPUT_POST, 'username', FILTER_VALIDATE_EMAIL);
         $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
 
@@ -37,8 +40,8 @@ class AuthenticationController extends DefaultController {
             if ($user !== null) {
                 if (password_verify($password, $user->getPassword())) {
 
-                    /** @TODO check that SQL went well */
                     $user->setLastLogin(new \DateTime());
+                    /** @TODO check that SQL went well */
                     $userDAO->update($user);
 
                     // Do not show users's password
@@ -47,7 +50,9 @@ class AuthenticationController extends DefaultController {
                     $token = $this->generateJWTToken($user);
 
                     $_SESSION['loggedUser'] = $user;
+                    // Admin's redirection page is '/user', user's is '/request'
                     $redirect = AuthenticationController::isAdmin() ? Router::generateUrl('User', 'index') : Router::generateUrl('Request', 'index');
+
                     return json_encode(['status' => 200, 'token' => $token, 'redirect' => $redirect]);
                 }
             }
@@ -70,12 +75,13 @@ class AuthenticationController extends DefaultController {
 
         $signature = AuthenticationController::encodeBase64Url(hash_hmac('sha256', "{$header}.{$payload}", $_ENV['SECRET'], true));
 
-        // Create JWT
+        // Generate JWT
         $jwt = "{$header}.{$payload}.{$signature}";
 
         return $jwt;
     }
 
+    // Verify if the current request hold a valid token. (Token stored in cookie)
     public static function hasValidJWTToken(): bool {
         $token = filter_input(INPUT_COOKIE, 'token', FILTER_SANITIZE_STRING);
 
@@ -84,7 +90,7 @@ class AuthenticationController extends DefaultController {
 
         $parts = explode('.', $token);
 
-        //Invalid token structure
+        // Invalid token structure
         if (count($parts) !== 3)
             return false;
 
@@ -109,13 +115,15 @@ class AuthenticationController extends DefaultController {
 
         $signatureToHash = AuthenticationController::encodeBase64Url($header) . '.' . AuthenticationController::encodeBase64Url(json_encode($payload));
 
-        // Repeat procedure and compare signature
+        // Repeat token generation procedure and compare signature
         $expectedSignature = AuthenticationController::encodeBase64Url(hash_hmac('SHA256', $signatureToHash, $_ENV['SECRET'], true));
 
+        // Incorrect token
         if ($signature !== $expectedSignature) {
             return false;
         }
 
+        // The token is valid.
         $_SERVER['loggedUser'] = $user;
 
         return true;
@@ -124,12 +132,13 @@ class AuthenticationController extends DefaultController {
     /**
      * @TODO Make real role system and control user's access
      */
+    // Verify if the user can visit this page
+    // Basically only an admin can access the User administration
     public static function hasAccess($controller, $action) {
         switch ($controller) {
             case UserController::class :
             case UserAPIController::class :
                 return AuthenticationController::isAdmin();
-                break;
             default:
                 return true;
         }
@@ -138,6 +147,7 @@ class AuthenticationController extends DefaultController {
         return false;
     }
 
+    // "Encode" a string in base 64 but make it url "friendly"
     private static function encodeBase64Url($data) {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($data));
     }
@@ -145,6 +155,7 @@ class AuthenticationController extends DefaultController {
     /**
      * @TODO Make real role system and control user's access
      */
+    // Check if the user has admin rights
     public static function isAdmin() {
         return isset($_SERVER['loggedUser']) ? $_SERVER['loggedUser']->getId() === 1 : false;
     }

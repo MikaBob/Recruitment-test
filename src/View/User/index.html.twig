@@ -1,205 +1,276 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}User list{% endblock %}
+{% block title %}Request list{% endblock %}
 
 {% block content %}
-    <h2>User list</h2>
-    <div class="my-1">
-        <span class="text-secondary">Click on a row to edit user</span>
-        <span class="float-end"><a href="/user/create" class="btn btn-outline-primary btn">Add new user</a></span>
-    </div>
+    <h2>Request list</h2>
     <div id="alert" class="alert alert-danger alert-dismissible" style="display: none;" role="alert"></div>
     <table class="table table-striped table-hover table-bordered">
-        <caption>List of user</caption>
+        <caption>List of request</caption>
         <tr>
-            <th scope="col">First name</th>
-            <th scope="col">Last name</th>
-            <th scope="col">Email</th>
-            <th scope="col" class="d-none d-sm-table-cell">Creation date</th>
-            <th scope="col" class="d-none d-sm-table-cell">Last connection</th>
+            {% if isAdmin %}<th scope="col">Request from</th>{% endif %}
+            <th scope="col">From </th>
+            <th scope="col">To</th>
+            <th scope="col">Status</th>
+            <th scope="col">Action</th>
         </tr>
-        <tbody id="userList"></tbody>
+        <tbody id="requestList"></tbody>
     </table>
+
+    {% if not isAdmin %}
+    <div class="my-1">
+        <h2>Make a new request</h2>
+        <form id="createRequestForm" class="row" onsubmit="return createRequest();">
+            <div class="col-md-4 col-12">
+                <label for="startDate" class="form-label">Start date</label>
+                <input type="datetime-local" class="form-control" id="startDate" name="startDate">
+            </div>
+
+            <div class="col-md-4 col-12">
+                <label for="endDate" class="form-label">End date</label>
+                <input type="datetime-local" class="form-control" id="endDate" name="endDate">
+            </div>
+
+            <div class="col-md-4 col-12 my-2">
+                <br>
+                <button name="test" id="test" type="submit" class="btn btn-outline-primary w-100">Add new request</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
 
     <!-- Modal (https://getbootstrap.com/docs/4.0/components/modal/) -->
     <div class="modal fade" id="modalCenter" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <form id="modalForm" onsubmit="return saveChanges();">
-                    <input id="userId" name="userId" type="hidden" value=""/>
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalTitle"></h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div id="modalAlert" class="alert alert-danger alert-dismissible" style="display: none;" role="alert"></div>
-                    <div class="modal-body">
-                        <table class="table table-striped table-hover table-bordered">
-                            <caption>User profile</caption>
-                            <tr>
-                                <td><b>First name</b></td>
-                                <td><input id="firstName" name="firstName" type="text" value=""/></td>
-                            </tr>
-                            <tr>
-                                <td><b>Last name</b></td>
-                                <td><input id="lastName" name="lastName" type="text" value=""/></td>
-                            </tr>
-                            <tr>
-                                <td><b>Email</b></td>
-                                <td><input id="email" name="email" type="email" value=""/></td>
-                            </tr>
-                        </table>
-                        <table class="table table-striped table-hover table-bordered">
-                            <caption>Onboarding tasks</caption>
-                            <tr>
-                                <th></th>
-                                <th><b>Is done ?</b></th>
-                            </tr>
-                            <tr>
-                                <td>Microsoft Office license</td>
-                                <td><input id="dynamicFields_MOL" type="checkbox" /></td>
-                            </tr>
-                            <tr>
-                                <td>Email access granted</td>
-                                <td><input id="dynamicFields_EAG" type="checkbox" /></td>
-                            </tr>
-                            <tr>
-                                <td>Git repository granted</td>
-                                <td><input id="dynamicFields_GRG" type="checkbox" /></td>
-                            </tr>
-                            <tr>
-                                <td>Jira access granted</td>
-                                <td><input id="dynamicFields_JAG" type="checkbox" /></td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save changes</button>
-                    </div>
-                </form>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">Are you sure you want to <span id="modalBoldTextAction"></span> this request ?<br><br>This action is definitive !</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                    <button type="submit" id="modalAction" class="btn btn-primary">Yes</button>
+                </div>
             </div>
         </div>
     </div>
-
-
-    <script type="text/javascript">
-        $( document ).ready(function() {
-
-            refreshUserList = function(){
-                $.ajax({
-                    url: "/userAPI/list/",
-                    async: true,
-                    type: 'GET',
-
-                    success: function(data) {
-                        $('#userList').html('');
-
-                        data.users.forEach((user) => {
-                            $('#userList').append("\n\
-                                <tr class=\"userRow\" scope=\"row\" data-userId=\""+ user.id +"\">\n\
-                                    <td>"+user.firstName+"</td>\n\
-                                    <td>"+user.lastName+"</td>\n\
-                                    <td>"+user.email+"</td>\n\
-                                    <td class=\"d-none d-sm-table-cell\">"+user.creationDate+"</td>\n\
-                                    <td class=\"d-none d-sm-table-cell\">"+user.lastLogin+"</td>\n\
-                                </tr>\n\
-                            ");
-
-                            $('tr.userRow').bind('click', openModal);
-                        });
-                    },
-                    error: function (){
-                        $('#alert').text('Error: Could not load list of users');
-                        $('#alert').fadeIn();
-                    }
-                });
-            };
-
-            openModal = function(e) {
-                let userId = $(e.currentTarget).attr('data-userId');
-
-                $.ajax({
-                    url: "/userAPI/get/"+userId,
-                    async: true,
-                    type: 'GET',
-
-                    success: function(data) {
-                        let user = data.user;
-
-                        $('#modalTitle').text('Edit user ' + user.email);
-                        $('#modalForm #userId').val(user.id);
-                        $('#modalForm #firstName').val(user.firstName);
-                        $('#modalForm #lastName').val(user.lastName);
-                        $('#modalForm #email').val(user.email);
-
-                        if(user.dynamicFields !== null){
-                            $('#modalForm #dynamicFields_MOL').prop("checked", (typeof user.dynamicFields.MOL !== 'undefined') ? user.dynamicFields.MOL : false);
-                            $('#modalForm #dynamicFields_EAG').prop("checked", (typeof user.dynamicFields.EAG !== 'undefined') ? user.dynamicFields.EAG : false);
-                            $('#modalForm #dynamicFields_GRG').prop("checked", (typeof user.dynamicFields.GRG !== 'undefined') ? user.dynamicFields.GRG : false);
-                            $('#modalForm #dynamicFields_JAG').prop("checked", (typeof user.dynamicFields.JAG !== 'undefined') ? user.dynamicFields.JAG : false);
-                        } else {
-                            $('#modalForm #dynamicFields_MOL').prop("checked", false);
-                            $('#modalForm #dynamicFields_EAG').prop("checked", false);
-                            $('#modalForm #dynamicFields_GRG').prop("checked", false);
-                            $('#modalForm #dynamicFields_JAG').prop("checked", false);
-                        }
-                        $('#modalCenter').modal('show');
-                    },
-                    error: function (xhr){
-                        let data = xhr.responseJSON;
-                        $('#alert').text('Error: ' + data);
-                        $('#alert').fadeIn();
-                        setTimeout(()=>{
-                            $('#alert').text('');
-                            $('#alert').fadeOut();
-                        }, 3000);
-                    }
-                });
-            };
-
-            saveChanges = function() {
-                let userId = $('#modalForm #userId').val();
-
-                var data = {
-                    'firstName' : $('#modalForm #firstName').val(),
-                    'lastName' : $('#modalForm #lastName').val(),
-                    'email' : $('#modalForm #email').val(),
-                    'dynamicFields' : {
-                        'MOL' : $('#modalForm #dynamicFields_MOL').prop("checked"),
-                        'EAG' : $('#modalForm #dynamicFields_EAG').prop("checked"),
-                        'GRG' : $('#modalForm #dynamicFields_GRG').prop("checked"),
-                        'JAG' : $('#modalForm #dynamicFields_JAG').prop("checked")
-                    }
-                };
-
-                $.ajax({
-                    url: "/userAPI/post/"+userId,
-                    async: true,
-                    data: data,
-                    type: 'POST',
-
-                    success: function() {
-                        $('#modalCenter').modal('hide');
-                        refreshUserList();
-                    },
-                    error: function (xhr){
-                        let data = xhr.responseJSON;
-                        $('#modalAlert').text('Error: ' + data);
-                        $('#modalAlert').fadeIn();
-                        setTimeout(()=>{
-                            $('#modalAlert').text('');
-                            $('#modalAlert').fadeOut();
-                        }, 3000);
-                    }
-                });
-
-                return false;
-            };
-
-            refreshUserList();
-        });
-    </script>
 {% endblock %}
 
+
+
+{% block javascripts %}
+{{ parent() }}
+<script type="text/javascript">
+    $( document ).ready(function() {
+        var requests = [];
+        {% if isAdmin %}
+        var users = [];
+
+        // get the list of users
+        getUsers = function() {
+            $.ajax({
+                url: "/userAPI/list/",
+                async: false,
+                type: 'GET',
+
+                success: function(data) {
+                    data.users.forEach((user) => {
+                        users[user.id] = user;
+                    });
+                },
+                error: function (){
+                    $('#alert').text('Error: Could not load list of users');
+                    $('#alert').fadeIn();
+                }
+            });
+        };
+
+        // For the table, translate the request.userId to user.email
+        showUserEmail = function(){
+            if(users.length === 0) {
+                getUsers();
+            }
+
+            $('tr.requestRow td[data-userId]').each((index , element) => {
+                let userId = $(element).attr('data-userId');
+                users.forEach((user) => {
+                    if(user.id === userId){
+                        $(element).html(user.email);
+                    }
+                });
+            });
+        };
+        {% endif%}
+
+        // Retrieve all user's requests. Admin gets to see everyone's
+        refreshRequestList = function(){
+            $.ajax({
+                url: "/requestAPI/list/",
+                async: true,
+                type: 'GET',
+
+                success: function(data) {
+                    $('#requestList').html('');
+                    data.requests.forEach((request) => {
+
+                        requests[request.id] = request;
+                        let tableRow = "";
+                        tableRow += "<tr class=\"requestRow\" scope=\"row\" data-requestId=\""+ request.id +"\">\n";
+                        {% if isAdmin %}tableRow += "<td data-userId=\""+request.userId+"\"></td>\n"; {% endif %}
+                        tableRow += "<td>"+request.startDate+"</td>\n";
+                        tableRow += "<td>"+request.endDate+"</td>\n";
+                        tableRow += "<td>"+request.status+"</td>\n";
+                        if(request.status === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_PENDING') }}'){
+                        {% if isAdmin %}
+                            tableRow += "<td class=\"text-center\"><button class=\"btn btn-danger\" onclick=\"updateRequest("+request.id+", '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_REJECTED') }}')\">Reject</button>\n";
+                            tableRow += "<button class=\"btn btn-success\" onclick=\"updateRequest("+request.id+", '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_APPROUVED') }}')\">Approuve</button>\n\</td>\n";
+                        {% else %}
+                            tableRow += "<td class=\"text-center\"><button class=\"btn btn-danger\" onclick=\"deleteRequest("+request.id+")\">Cancel</button>\n";
+                        {% endif%}
+                            } else {
+                            tableRow += "<td />";
+                        }
+                        tableRow += "</tr>\n";
+                        $('#requestList').append(tableRow);
+                    });
+                    {% if isAdmin %}showUserEmail();{% endif%}
+                },
+                error: function (){
+                    showError('#alert', 'Error: Could not load list of requests');
+                }
+            });
+        };
+
+        // prepare and show the modal
+        openModal = function(requestId, content) {
+            let request = requests[requestId];
+            $('#modalTitle').text('Request ' + request.id{% if isAdmin %}+ ' of '+users[request.userId].email{% endif %});
+            $('#modalBoldTextAction').html(content);
+            $('#modalCenter').modal('show');
+        };
+
+        {% if isAdmin %}
+        // Request status update. Admin only
+        updateRequest = function(requestId, newStatus) {
+            // check newStatus value
+            if(newStatus === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_APPROUVED') }}') {
+                openModal(requestId, '<b class="text-success">approuve</b>');
+            } else if(newStatus === '{{ constant('Blexr\\Model\\Entity\\RequestAbstract::STATUS_REJECTED') }}') {
+                openModal(requestId, '<b class="text-danger">reject</b>');
+            } else {
+                // Should never happened, but just in case x)
+                showError('#alert', 'Error: unknown request status '+newStatus);
+            }
+
+            $('#modalAction').click(()=>{
+                $.ajax({
+                    url: "/requestAPI/put/"+requestId,
+                    async: true,
+                    data: { status : newStatus},
+                    type: 'POST',
+
+                    error: function (xhr){
+                        let data = xhr.responseJSON;
+                        showError('#alert', 'Error: ' + data);
+                    }
+                }).always(() => {
+                    $('#modalCenter').modal('hide');
+                    refreshRequestList();
+                });
+            });
+        };
+
+        {% else %}
+        // Request cancelation. User only
+        deleteRequest = function(requestId) {
+            openModal(requestId, '<b class="text-danger">delete</b>');
+            $('#modalAction').click(()=>{
+                $.ajax({
+                    url: "/requestAPI/delete/"+requestId,
+                    async: true,
+                    type: 'DELETE',
+
+                    error: function (xhr){
+                        let data = xhr.responseJSON;
+                        showError('#alert', 'Error: ' + data);
+                    }
+                }).always(() => {
+                    $('#modalCenter').modal('hide');
+                    refreshRequestList();
+                });
+            });
+        };
+
+        // Request creation. User only
+        createRequest = function() {
+            // check dates
+            let startDate = new Date($('#createRequestForm #startDate').val());
+            let endDate = new Date($('#createRequestForm #endDate').val());
+
+            if(startDate.toString() === 'Invalid Date' || endDate.toString() === 'Invalid Date' || startDate > endDate) {
+                showError('#alert', 'Error: Invalid dates');
+                return false;
+            }
+
+            // Same as backend
+            // Check deadline. startDate must be at least 4 hours before the end of the previous day
+            let now = new Date();
+            let deadline = new Date(startDate);
+
+            // deadline = startDate -1 days, 8pm
+            deadline.setDate(deadline.getDate() - 1);
+            deadline.setHours(20);
+            deadline.setMinutes(0);
+            deadline.setSeconds(0);
+
+            if(now > deadline){
+                showError('#alert', 'Error: Your starting date is too early. It can not be approuved so quick');
+                return false;
+            }
+
+            var data = {
+                'startDate' : startDate.toString(),
+                'endDate' : endDate.toString()
+            };
+
+            $.ajax({
+                url: "/requestAPI/post/",
+                async: true,
+                data: data,
+                type: 'POST',
+
+                success: function(data) {
+                    refreshRequestList();
+                    // reset calendars
+                    $('#createRequestForm #startDate').val('');
+                    $('#createRequestForm #endDate').val('');
+                },
+
+                error: function (xhr){
+                    let data = xhr.responseJSON;
+                    showError('#alert', 'Error: ' + data);
+                }
+            });
+
+            return false;
+        };
+        {% endif %}
+
+        /** @TODO make it global */
+        // Display error
+        showError = function(element, error) {
+            $(element).text(error);
+            $(element).fadeIn();
+            setTimeout(()=>{
+                $(element).text('');
+                $(element).fadeOut();
+            }, 3000);
+        }
+
+        refreshRequestList();
+    });
+</script>
+{% endblock %}

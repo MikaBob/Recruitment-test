@@ -35,52 +35,59 @@
         </div>
     </form>
     <div id="alert" class="alert alert-danger alert-dismissible" style="display: none;" role="alert"></div>
-
-    <script type="text/javascript">
-        function login(){
-            var data = {
-                'username' : $('#username').val(),
-                'password' : $('#password').val()
-            };
-
-            $.ajax({
-                url: "/authentication/login",
-                async: true,
-                data: data,
-                type: 'POST',
-
-                success: function(data) {
-                    let payload = parseJwt(data.token);
-                    setCookie('token', data.token, payload.exp);
-
-                    window.location.pathname = data.redirect;
-                },
-                error: function(xhr) {
-                    let data = xhr.responseJSON;
-
-                    $('#alert').text('Error: ' + data.error);
-                    $('#alert').fadeIn();
-                    setTimeout(()=>{
-                        $('#alert').text('');
-                        $('#alert').fadeOut();
-                    }, 3000);
-                }
-            });
-
-            return false;
-        }
-
-        function forgottenPassword(){
-            /** @TODO send per email a request to reset password with temporary token in url */
-            $('#alert').text('Too bad :/');
-            $('#alert').show();
-            setTimeout(()=>{
-                $('#alert').text('');
-                $('#alert').fadeOut();
-            }, 3000);
-        }
-    </script>
 </div>
 
 
+{% endblock %}
+
+
+{% block javascripts %}
+{{ parent() }}
+<script type="text/javascript">
+
+    // submit credentials to obtain access token
+    // store token in cookie
+    function login(){
+        var data = {
+            'username' : $('#username').val(),
+            'password' : $('#password').val()
+        };
+
+        $.ajax({
+            url: "/authentication/login",
+            async: true,
+            data: data,
+            type: 'POST',
+
+            success: function(data) {
+                let payload = parseJwt(data.token);
+                setCookie('token', data.token, payload.exp);
+
+                window.location.pathname = data.redirect;
+            },
+            error: function(xhr) {
+                let data = xhr.responseJSON;
+
+                $('#alert').text('Error: ' + data.error);
+                $('#alert').fadeIn();
+                setTimeout(()=>{
+                    $('#alert').text('');
+                    $('#alert').fadeOut();
+                }, 3000);
+            }
+        });
+
+        return false;
+    }
+
+    /** @TODO send per email a request to reset password with temporary token in url */
+    function forgottenPassword(){
+        $('#alert').text('Too bad :/');
+        $('#alert').show();
+        setTimeout(()=>{
+            $('#alert').text('');
+            $('#alert').fadeOut();
+        }, 3000);
+    }
+</script>
 {% endblock %}

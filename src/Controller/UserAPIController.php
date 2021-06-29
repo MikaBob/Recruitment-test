@@ -31,6 +31,7 @@ class UserAPIController extends DefaultAPIController {
         return $this->generateResponse(200, ['users' => $result]);
     }
 
+    // Get a specific User
     public function get($params) {
         $id = $params[0] ?? null;
 
@@ -51,6 +52,7 @@ class UserAPIController extends DefaultAPIController {
         return $this->generateResponse(200, ['user' => $user]);
     }
 
+    // Update an User
     public function post($params) {
         $id = $params[0] ?? null;
 
