@@ -119,6 +119,25 @@ class AuthenticationController extends DefaultController {
         return true;
     }
 
+    /**
+     * @TODO Make real role system and control user's access
+     */
+    public static function hasAccess($controller, $action) {
+        $isAdmin = isset($_SERVER['loggedUser']) ? $_SERVER['loggedUser']->getId() === 1 : false;
+
+        switch ($controller) {
+            case UserController::class :
+            case UserAPIController::class :
+                return $isAdmin;
+                break;
+            default:
+                return true;
+        }
+
+        // shoud never happened, but just in case
+        return false;
+    }
+
     private static function encodeBase64Url($data) {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($data));
     }

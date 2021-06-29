@@ -56,7 +56,7 @@
                     if(location.pathname !== '/')
                         location.reload(true);
                     else
-                        window.location.pathname = '/user';
+                        window.location.pathname = payload.id === 1 ? '/user' : '/request';
                 },
                 error: function(data) {
                     $('#alert').text('Error: ' + data.error);

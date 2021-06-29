@@ -20,6 +20,8 @@
                     {% if loggedUser is not null %}
                         <div class="collapse navbar-collapse" id="navbarSupportedContent">
                             <ul class="navbar-nav mr-auto">
+
+                                {# @TODO make better check for admin rights #}
                                 {% if loggedUser.id == 1 %}
                                     <li class="nav-item">
                                         <a class="nav-link" href="/user">Users</a>
@@ -30,6 +32,9 @@
                                 </li>
                             </ul>
                          </div>
+                        <a class="d-none d-sm-block">
+                            {{ loggedUser.firstName }} {{ loggedUser.lastName }}
+                        </a>
                     {% endif %}
                 </nav>
             </header>

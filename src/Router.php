@@ -31,8 +31,13 @@ class Router {
                 if (class_exists($fullQualifiedClassName, true)) {
                     if (method_exists($fullQualifiedClassName, $action)) {
 
-                        $controller = new $fullQualifiedClassName();
-                        echo call_user_func([$controller, $action], $params);
+                        if (AuthenticationController::hasAccess($fullQualifiedClassName, $action)) {
+                            $controller = new $fullQualifiedClassName();
+                            echo call_user_func([$controller, $action], $params);
+                        } else {
+                            http_response_code(403);
+                            echo "Error 403 : Forbidden";
+                        }
                     } else {
                         http_response_code(404);
                         echo "Page not found 404 : Method $action not found in controller $controllerName";
