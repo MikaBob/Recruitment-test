@@ -4,6 +4,7 @@ namespace Blexr\Controller;
 
 use Blexr\Model\UserDAO;
 use Blexr\Model\Entity\User;
+use Blexr\Router;
 
 class AuthenticationController extends DefaultController {
 
@@ -46,8 +47,8 @@ class AuthenticationController extends DefaultController {
                     $token = $this->generateJWTToken($user);
 
                     $_SESSION['loggedUser'] = $user;
-
-                    return json_encode(['status' => 200, 'token' => $token]);
+                    $redirect = AuthenticationController::isAdmin() ? Router::generateUrl('User', 'index') : Router::generateUrl('Request', 'index');
+                    return json_encode(['status' => 200, 'token' => $token, 'redirect' => $redirect]);
                 }
             }
         }
@@ -141,6 +142,9 @@ class AuthenticationController extends DefaultController {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($data));
     }
 
+    /**
+     * @TODO Make real role system and control user's access
+     */
     public static function isAdmin() {
         return isset($_SERVER['loggedUser']) ? $_SERVER['loggedUser']->getId() === 1 : false;
     }

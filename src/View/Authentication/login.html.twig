@@ -53,7 +53,7 @@
                     let payload = parseJwt(data.token);
                     setCookie('token', data.token, payload.exp);
 
-                    window.location.pathname = {% if isAdmin %}'/user'{% else %}'/request'{% endif %};
+                    window.location.pathname = data.redirect;
                 },
                 error: function(xhr) {
                     let data = xhr.responseJSON;

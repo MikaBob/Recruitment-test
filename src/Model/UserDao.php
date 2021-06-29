@@ -31,13 +31,14 @@ class UserDAO extends AbstractDAO {
 
     public function update(User $user): \PDOStatement {
         $query = $this->dbConnection->prepare(''
-                . 'UPDATE `' . $this->tableName . '` SET firstName = :firstName, lastName = :lastName, email = :email, dynamicFields = :dynamicFields '
+                . 'UPDATE `' . $this->tableName . '` SET firstName = :firstName, lastName = :lastName, email = :email, lastLogin = :lastLogin, dynamicFields = :dynamicFields '
                 . 'WHERE id = :id');
 
         $query->execute([
             ':firstName' => $user->getFirstName(),
             ':lastName' => $user->getLastName(),
             ':email' => $user->getEmail(),
+            ':lastLogin' => $user->getLastLogin()->format('c'),
             ':dynamicFields' => json_encode($user->getDynamicFields()),
             ':id' => $user->getId()
         ]);

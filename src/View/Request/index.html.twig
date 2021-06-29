@@ -107,6 +107,7 @@
                     success: function(data) {
                         $('#requestList').html('');
                         data.requests.forEach((request) => {
+
                             requests[request.id] = request;
                             let tableRow = "";
                             tableRow += "<tr class=\"requestRow\" scope=\"row\" data-requestId=\""+ request.id +"\">\n";
