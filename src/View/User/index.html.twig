@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}User{% endblock %}
+{% block title %}User list{% endblock %}
 
 {% block content %}
     <h2>User list</h2>
@@ -93,6 +93,7 @@
                     type: 'GET',
 
                     success: function(data) {
+                        $('#userList').html('');
                         data.users.forEach((user) => {
                             $('#userList').append("\n\
                                 <tr class=\"userRow\" scope=\"row\" data-userId=\""+ user.id +"\">\n\
@@ -108,8 +109,8 @@
                         });
                     },
                     error: function (xhr, errorType, httpError){
-                        $('#modalAlert').text('Error: Could not load list of users');
-                        $('#modalAlert').fadeIn();
+                        $('#alert').text('Error: Could not load list of users');
+                        $('#alert').fadeIn();
                     }
                 });
             };
@@ -179,7 +180,6 @@
 
                     success: function(data) {
                         $('#modalCenter').modal('hide');
-                        $('#userList').html('');
                         refreshUserList();
                         /** @TODO Empty modal */
                     },

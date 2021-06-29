@@ -1,0 +1,168 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Request list{% endblock %}
+
+{% block content %}
+    <h2>Request list</h2>
+    <div id="alert" class="alert alert-danger alert-dismissible" style="display: none;" role="alert"></div>
+    <table class="table table-striped table-hover table-bordered">
+        <caption>List of request</caption>
+        <tr>
+            {% if isAdmin %}<th scope="col">Request from</th>{% endif %}
+            <th scope="col">From </th>
+            <th scope="col">To</th>
+            <th scope="col">Status</th>
+            <th scope="col">Action</th>
+        </tr>
+        <tbody id="requestList"></tbody>
+    </table>
+
+    {% if not isAdmin %}
+    <div class="my-1">
+        <h2>Make a new request</h2>
+        <form id="createRequestForm" class="row" onsubmit="return createRequest();">
+            <div class="col-md-4 col-12">
+                <label for="startDate" class="form-label">Start date</label>
+                <input type="datetime-local" class="form-control" id="startDate" name="startDate">
+            </div>
+
+            <div class="col-md-4 col-12">
+                <label for="endDate" class="form-label">End date</label>
+                <input type="datetime-local" class="form-control" id="endDate" name="endDate">
+            </div>
+
+            <div class="col-md-4 col-12 my-2">
+                <br>
+                <button name="test" id="test" type="submit" class="btn btn-outline-primary w-100">Add new request</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Modal (https://getbootstrap.com/docs/4.0/components/modal/) -->
+    <div class="modal fade" id="modalCenter" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form id="modalForm" onsubmit="return saveChanges();">
+                    <input id="requestId" name="requestId" type="hidden" value=""/>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                        <button type="submit" class="btn btn-primary">Yes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        $( document ).ready(function() {
+            {% if isAdmin %}
+                $.ajax({
+                    url: "/userAPI/list/",
+                    async: true,
+                    type: 'GET',
+
+                    success: function(data) {
+                        // @TODO change request userId with email
+                        console.log(data);
+                    },
+                    error: function (xhr, errorType, httpError){
+                        $('#alert').text('Error: Could not load list of users');
+                        $('#alert').fadeIn();
+                    }
+                });
+            {% endif%}
+
+
+            refreshRequestList = function(){
+                $.ajax({
+                    url: "/requestAPI/list/",
+                    async: true,
+                    type: 'GET',
+
+                    success: function(data) {
+                        $('#requestList').html('');
+                        data.requests.forEach((request) => {
+                            $('#requestList').append("\n\
+                                <tr class=\"requestRow\" scope=\"row\" data-requestId=\""+ request.id +"\">\n\
+                                    {% if isAdmin %}<td>"+request.userId+"</td>\n\ {% endif %}
+                                    <td>"+request.startDate+"</td>\n\
+                                    <td>"+request.endDate+"</td>\n\
+                                    <td>"+request.status+"</td>\n\
+                                    <td><button onclick=\"openModal("+request.id+")\">Delete</button></td>\n\
+                                </tr>\n\
+                            ");
+                        });
+                    },
+                    error: function (xhr, errorType, httpError){
+                        showError('#alert', 'Error: Could not load list of requests');
+                    }
+                });
+            };
+
+            openModal = function(requestId) {
+                console.log('open modal');
+            };
+
+            saveChanges = function() {
+                console.log('save change');
+            };
+
+            createRequest = function() {
+                let startDate = new Date($('#createRequestForm #startDate').val());
+                let endDate = new Date($('#createRequestForm #endDate').val());
+
+                if(startDate.toString() === 'Invalid Date' || endDate.toString() === 'Invalid Date' || startDate > endDate) {
+                    showError('#alert', 'Error: Invalid dates');
+                    return false;
+                }
+
+                var data = {
+                    'startDate' : startDate.getTime()/1000,
+                    'endDate' : endDate.getTime()/1000
+                };
+
+                $.ajax({
+                    url: "/requestAPI/post/",
+                    async: true,
+                    data: data,
+                    type: 'POST',
+
+                    success: function(data) {
+                        refreshRequestList();
+                        $('#createRequestForm #startDate').val('');
+                        $('#createRequestForm #endDate').val('');
+                    },
+
+                    error: function (xhr, errorType, httpError){
+                        let data = xhr.responseJSON;
+                        showError('#alert', 'Error: ' + data);
+                    }
+                });
+
+                return false;
+            };
+
+            showError = function(element, error) {
+                $(element).text(error);
+                $(element).fadeIn();
+                setTimeout(()=>{
+                    $(element).text('');
+                    $(element).fadeOut();
+                }, 3000);
+            }
+
+
+            refreshRequestList();
+        });
+    </script>
+{% endblock %}
+

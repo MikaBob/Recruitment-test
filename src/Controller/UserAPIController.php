@@ -5,7 +5,7 @@ namespace Blexr\Controller;
 use Blexr\Model\Entity\User;
 use Blexr\Model\UserDAO;
 
-class UserAPIController {
+class UserAPIController extends DefaultAPIController {
 
     /**
      * Return list of users
@@ -101,12 +101,6 @@ class UserAPIController {
         $user->setPassword('');
 
         return $this->generateResponse(200, ['user' => $user]);
-    }
-
-    private function generateResponse($httpCode, $message) {
-        header("Content-Type: application/json; charset=UTF-8");
-        http_response_code($httpCode);
-        return json_encode($message);
     }
 
 }

@@ -8,6 +8,10 @@ class UserDAO extends AbstractDAO {
 
     protected $tableName = 'user';
 
+    public function __construct() {
+        parent::__construct($this->tableName);
+    }
+
     public function insert(User $user): \PDOStatement {
         $query = $this->dbConnection->prepare(''
                 . 'INSERT INTO `' . $this->tableName . '` (firstName, lastName, email, creationDate, password, dynamicFields) '

@@ -28,6 +28,7 @@ abstract class DefaultController {
 
         $loggedUser = $_SERVER['loggedUser'] ?? null;
         $this->twig->addGlobal('loggedUser', $loggedUser);
+        $this->twig->addGlobal('isAdmin', AuthenticationController::isAdmin());
     }
 
 }

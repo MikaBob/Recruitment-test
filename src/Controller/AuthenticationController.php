@@ -123,12 +123,10 @@ class AuthenticationController extends DefaultController {
      * @TODO Make real role system and control user's access
      */
     public static function hasAccess($controller, $action) {
-        $isAdmin = isset($_SERVER['loggedUser']) ? $_SERVER['loggedUser']->getId() === 1 : false;
-
         switch ($controller) {
             case UserController::class :
             case UserAPIController::class :
-                return $isAdmin;
+                return AuthenticationController::isAdmin();
                 break;
             default:
                 return true;
@@ -140,6 +138,10 @@ class AuthenticationController extends DefaultController {
 
     private static function encodeBase64Url($data) {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($data));
+    }
+
+    public static function isAdmin() {
+        return isset($_SERVER['loggedUser']) ? $_SERVER['loggedUser']->getId() === 1 : false;
     }
 
 }

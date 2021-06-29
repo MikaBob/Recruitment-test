@@ -53,10 +53,7 @@
                     let payload = parseJwt(data.token);
                     setCookie('token', data.token, payload.exp);
 
-                    if(location.pathname !== '/')
-                        location.reload(true);
-                    else
-                        window.location.pathname = payload.id === 1 ? '/user' : '/request';
+                    window.location.pathname = {% if isAdmin %}'/user'{% else %}'/request'{% endif %};
                 },
                 error: function(data) {
                     $('#alert').text('Error: ' + data.error);
