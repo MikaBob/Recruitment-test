@@ -14,7 +14,7 @@ abstract class AbstractDAO {
     public function getAll() {
         $query = $this->dbConnection->prepare("SELECT * FROM $this->tableName");
         $query->execute();
-        return $query->fetchAll();
+        return $query->fetchAll(\PDO::FETCH_OBJ);
     }
 
     public function getById($id) {

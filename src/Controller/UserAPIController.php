@@ -7,6 +7,30 @@ use Blexr\Model\UserDAO;
 
 class UserAPIController {
 
+    /**
+     * Return list of users
+     * @TODO sort, offset, limit
+     */
+    public function list() {
+        if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) !== "GET") {
+            return $this->generateResponse(400, 'Bad Request');
+        }
+
+        $userDAO = new UserDAO();
+        $result = $userDAO->getAll();
+
+        if ($result === false) {
+            return $this->generateResponse(400, $result->errorInfo());
+        }
+
+        // Do not show users's password
+        foreach ($result as $user) {
+            $user->password = '';
+        }
+
+        return $this->generateResponse(200, ['users' => $result]);
+    }
+
     public function get($params) {
         $id = $params[0] ?? null;
 

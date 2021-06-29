@@ -10,12 +10,7 @@ use Blexr\MailSender;
 class UserController extends DefaultController {
 
     public function index() {
-
-        $userDAO = new UserDAO();
-
-        $users = $userDAO->getAll();
-
-        echo $this->twig->render('User/index.html.twig', ['users' => $users]);
+        echo $this->twig->render('User/index.html.twig');
     }
 
     public function create() {
