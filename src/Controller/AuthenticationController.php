@@ -47,6 +47,7 @@ class AuthenticationController extends DefaultController {
                     // Do not show users's password
                     $user->setPassword('');
 
+                    /** @TODO refresh token */
                     $token = $this->generateJWTToken($user);
 
                     $_SESSION['loggedUser'] = $user;

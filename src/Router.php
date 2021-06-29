@@ -24,7 +24,7 @@ class Router {
             $action = $request['action'];
             $params = $request['params'];
 
-            // if wants to log in (use AuthenticationController) or already is logged in
+            // If wants to log in (use AuthenticationController) or already is logged in
             if ($fullQualifiedClassName === AuthenticationController::class || AuthenticationController::hasValidJWTToken()) {
 
                 // class_exists()  will call the autoloader if class not already loaded.

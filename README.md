@@ -14,13 +14,42 @@ After cloning the project and arrange a virtual host:
 
 - Rename `.env.example` to .env and edit the environement vars.
 
-- To create the database run `php ./scripts/create_database.php` or simply create a database manually and import the create_datase.sql file into. (Admin's password is 'admin' by default)
+- To create the database run `php ./scripts/create_database.php` or simply create a database manually and import the create_datase.sql file into.
+
+Two accounts are created:
+| Username |  password
+|:-----|:--------:|
+| `admin@blexr.com` | admin |
+| `user@blexr.com` | uuser |
 
 # Tests
 To run the phpunit test, we have to specify the bootstrap:
 `./vendor/bin/phpunit --bootstrap .\Autoloader.php src/Tests`
 
-# Explaination
+# Detailed explanation
+## General idea
+### Summary
+At Blexr we’ve hit a road bump: we’re finding it difficult to keep track of remote and on-site
+employees, and we need a stand-alone, browser-based app to handle this.
+### Main Features
+ - **Adding new users:** When new employees are hired, the administrator must have a screen to add
+new employees. An email should be sent out with the employee's log in details and random
+password.
+ - **Onboarding tasks completed:** Each employee is to have a set of checkboxes which the
+administrator is to tick off when they have been completed. These tick boxes should include:
+"Microsoft Office License", "Email Access Granted", "Git Repository Granted", "Jira Access
+Granted". These are just to keep track of what licenses have been allocated to the employee.
+
+ - **User work-from-home request:** Once registered, a user can request or cancel a request to work
+from home on specific dates. Basic authentication should be implemented so that only registered
+users can make a request.
+A work-from-home request can be made according to the following rules:
+    - A request must be made at least 4 hours before the end of the previous day;
+    -  Work-from-home can be booked by number of hours, rather than a full work-day.
+
+ - **Request approval:** The administrator requires a screen to be able to see the requests, filter them,
+approve or reject them. The employee should be notified on status change of a request.
+
 ## Bootstrap and Routing
 As explicitly setup in [.htaccess](https://github.com/MikaBob/blexr/blob/main/.htaccess#L4), every request will go throught **entrypoint.php** except for files in public_html.
 
@@ -48,6 +77,11 @@ Example:
 After checking up the config in the .env file, the Router take it from here and parse the url `/Controller/Action/param1/param2/...`
 
 If the Controller and his action exist, the router will print the controller's response. If the Controler or Action is not specified, **AuthenticationControler** and **Index** are taken as default. Otherwise we will have a redirection to a 404.
+
+## Authentication & Authorization
+Except for user's account creation, all request can be done through the API, which involve an access token. For this project a [JSON Web Token](https://en.wikipedia.org/wiki/JSON_Web_Token) (JWT) solution is generated (after a successfull log in) and stored as a cookie for 15min. The JWT contains the user id and an expiration date (Extra payload on "top" of the secret data).
+
+For now, to check if a user as enough right to access, the AuthenticationController simply check if the user is **THE** admin. But implementing a real role and rights system is on the todo list ;). Basically only an admin can access the User administration, otherwise they are not any restriction for pages.
 
 ## Database
 For now it only contains one table (User) which really has a classic structure except the **dynamicFields** column.
@@ -117,3 +151,12 @@ abstract class UserAbstract {
 }
 ```
 The abstract class has the method to edit the dynamicField. From here we can add/remove dynamic fields, easy to maintain and no need to update the database :)
+
+## Views
+First of all, the website is Responsive (thanks [Bootstrap](https://getbootstrap.com/)). You can play with the window size to see some columns disapear or button getting aligned.
+
+[Twig](https://twig.symfony.com/) is an excellent template engine for php project. Easy to install, and to use. Anyway, to keep it simple there is have only 1 main template ([base.html.twig](https://github.com/MikaBob/blexr/tree/main/src/View)) which is extented by all the other, with only 3 blocks: title, content and javascript.
+
+Block name are quite self explaining, every child just fill or complete each block.
+
+There are 2 main pages. [User index](https://github.com/MikaBob/blexr/blob/main/src/View/User/index.html.twig) (admin only) and [Request index](https://github.com/MikaBob/blexr/blob/main/src/View/Request/index.html.twig). Both present the list of each entities in a table and both contain a modal window to edit or confirm some actions.
