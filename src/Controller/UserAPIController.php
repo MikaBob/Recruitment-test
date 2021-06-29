@@ -43,7 +43,6 @@ class UserAPIController {
 
         /**
          * @TODO make real validation with constraints
-         * @TODO check if email already exist
          */
         $firstName = filter_input(INPUT_POST, 'firstName', FILTER_SANITIZE_STRING);
         $lastName = filter_input(INPUT_POST, 'lastName', FILTER_SANITIZE_STRING);
@@ -69,9 +68,9 @@ class UserAPIController {
                 return $this->generateResponse(400, $result->errorInfo());
             }
         } catch (\PDOException $ex) {
-            $errors[] = $ex->getMessage();
+            return $this->generateResponse(400, $ex->getMessage());
         } catch (\TypeError $error) {
-            $errors[] = $error->getMessage();
+            return $this->generateResponse(400, $error->getMessage());
         }
 
         // Do not show users's password

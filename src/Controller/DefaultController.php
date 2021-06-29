@@ -25,6 +25,9 @@ abstract class DefaultController {
 
         $this->twig = new Twig_Environment($loader, $params);
         $this->twig->addExtension(new IntlExtension());
+
+        $loggedUser = $_SERVER['loggedUser'] ?? null;
+        $this->twig->addGlobal('loggedUser', $loggedUser);
     }
 
 }

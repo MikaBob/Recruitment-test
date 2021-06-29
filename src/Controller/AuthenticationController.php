@@ -15,6 +15,9 @@ class AuthenticationController extends DefaultController {
         echo $this->twig->render('Authentication/login.html.twig', ['error' => $error]);
     }
 
+    /**
+     * Ajax call to receive token
+     */
     public function login($params) {
         header("Content-Type: application/json; charset=UTF-8");
 
@@ -41,6 +44,9 @@ class AuthenticationController extends DefaultController {
                     $user->setPassword('');
 
                     $token = $this->generateJWTToken($user);
+
+                    $_SESSION['loggedUser'] = $user;
+
                     return json_encode(['status' => 200, 'token' => $token]);
                 }
             }
@@ -49,8 +55,10 @@ class AuthenticationController extends DefaultController {
         return json_encode(['status' => 400, 'error' => 'Invalid credidentials']);
     }
 
+    /**
+     * https://en.wikipedia.org/wiki/JSON_Web_Token
+     */
     private function generateJWTToken(User $user): string {
-
         $header = AuthenticationController::encodeBase64Url(json_encode(['typ' => 'JWT', 'alg' => 'HS256']));
         $payload = AuthenticationController::encodeBase64Url(json_encode([
                     'id' => $user->getId(),
@@ -94,12 +102,21 @@ class AuthenticationController extends DefaultController {
         if ($user === null)
             return false;
 
+        // Do not show password
+        $user->setPassword('');
+
         $signatureToHash = AuthenticationController::encodeBase64Url($header) . '.' . AuthenticationController::encodeBase64Url(json_encode($payload));
 
         // Repeat procedure and compare signature
         $expectedSignature = AuthenticationController::encodeBase64Url(hash_hmac('SHA256', $signatureToHash, $_ENV['SECRET'], true));
 
-        return $signature === $expectedSignature;
+        if ($signature !== $expectedSignature) {
+            return false;
+        }
+
+        $_SERVER['loggedUser'] = $user;
+
+        return true;
     }
 
     private static function encodeBase64Url($data) {

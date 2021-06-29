@@ -9,7 +9,7 @@ CREATE TABLE `user` (
     `id` int(11) NOT NULL,
     `firstName` varchar(255) DEFAULT NULL,
      `lastName` varchar(255) DEFAULT NULL,
-     `email` varchar(255) NOT NULL,
+     `email` varchar(255) NOT NULL UNIQUE,
      `password` varchar(255) NOT NULL,
      `creationDate` datetime NOT NULL,
     `lastLogin` datetime DEFAULT NULL,

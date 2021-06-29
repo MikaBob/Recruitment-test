@@ -1,5 +1,7 @@
 <?php
 
+// To run this script, edit ../.env file and exectue 'php ./scripts/create_database.php' from root folder
+
 require __DIR__ . '\\..\\vendor\\autoload.php';
 
 // Check and load .env config
