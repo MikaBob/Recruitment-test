@@ -31,12 +31,12 @@ CREATE TABLE `user` (
 
 INSERT INTO `user` (`id`, `firstName`, `lastName`, `email`, `password`, `creationDate`, `lastLogin`, `dynamicFields`)
 VALUES (
-    1, 'Admin', 'Admin', 'admin@blexr.com', '$2y$10$ztxJP7yjWVTe0Mv/YJgxVeINRrQJnS.ZVpGjmSo7Jn4NxUjptTQS2', '2021-06-01 13:40:17', '0000-00-00 00:00:00', NULL
+    1, 'Admin', 'Admin', 'admin@blexr.com', '$2y$10$ztxJP7yjWVTe0Mv/YJgxVeINRrQJnS.ZVpGjmSo7Jn4NxUjptTQS2', '2021-06-01 13:40:17', '0000-00-00 00:00:00', '{"MOL":true,"EAG":true,"GRG":true,"JAG":true}'
 );
 
 INSERT INTO `user` (`id`, `firstName`, `lastName`, `email`, `password`, `creationDate`, `lastLogin`, `dynamicFields`)
 VALUES (
-    2, 'User', 'User', 'user@blexr.com', '$2y$10$F.kUrEnrb9025Karx6ddNe496pDSYNoB2aZlHzgvLJ6.FnCS36L.W', '2021-06-01 13:40:17', '0000-00-00 00:00:00', NULL
+    2, 'User', 'User', 'user@blexr.com', '$2y$10$F.kUrEnrb9025Karx6ddNe496pDSYNoB2aZlHzgvLJ6.FnCS36L.W', '2021-06-01 13:40:17', '0000-00-00 00:00:00', '{"MOL":true,"EAG":true,"GRG":true,"JAG":true}'
 );
 
 --

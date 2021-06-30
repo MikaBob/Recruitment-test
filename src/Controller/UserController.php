@@ -21,7 +21,6 @@ class UserController extends DefaultController {
         // if form is submited
         if (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING) === "POST") {
             $user = new User();
-
             /**
              * @TODO make real validation with constraints
              */

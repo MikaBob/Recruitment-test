@@ -38,7 +38,7 @@ class UserDAO extends AbstractDAO {
             ':firstName' => $user->getFirstName(),
             ':lastName' => $user->getLastName(),
             ':email' => $user->getEmail(),
-            ':lastLogin' => $user->getLastLogin()->format('c'),
+            ':lastLogin' => ($user->getLastLogin() === null ) ? 'null' : $user->getLastLogin()->format('c'),
             ':dynamicFields' => json_encode($user->getDynamicFields()),
             ':id' => $user->getId()
         ]);
