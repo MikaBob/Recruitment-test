@@ -10,7 +10,7 @@ CREATE TABLE `request` (
     `userId` int(11) NOT NULL,
     `startDate` datetime NOT NULL,
     `endDate` datetime NOT NULL,
-    `status` varchar(255) NOT NULL
+    `status` enum('PENDING','REJECTED','APPROUVED') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --

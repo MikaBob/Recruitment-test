@@ -2,30 +2,30 @@
 Stand alone browser based app for tracking remote and on-site employee
 
 # Requirements
-- PHP >=7.4 +  activate the pdo extension
-- MySQL
+- PHP 8 and activate the pdo extension (shoud be by default)
+- MySQL 8
 - [Composer](https://getcomposer.org/download/)
-- For local environement, a virtual host is required. The domain must be a simple url like mydomain.com (no localhost/path/to/project)
+- For local environement, a **virtual host is required** for the autoloading / routing to work properly. The domain must be a simple url like `mydomain.com` (not something like localhost/path/to/project)
 
 # Installation
 After cloning the project and arrange a virtual host:
 
 - `composer install`
 
-- Rename `.env.example` to .env and edit the environement vars.
+- Rename `.env.example` to `.env` and edit the environement vars.
 
-- To create the database run `php ./scripts/create_database.php` or simply create a database manually and import the create_datase.sql file into.
+- To create the database run `php ./scripts/create_database.php` or simply create a database manually and import the [create_datase.sql](https://github.com/MikaBob/blexr/blob/main/scripts/create_database.php) file into.
 
 Two accounts are created:
-| Username |  password
+| Username |  Password
 |:-----|:--------:|
 | `admin@blexr.com` | admin |
-| `user@blexr.com` | uuser |
+| `user@blexr.com` | user |
 
 # Tests
-To run the phpunit test, we have to specify the bootstrap:
+To run the phpunit test, we have to specify the bootstrap file:
 `./vendor/bin/phpunit --bootstrap .\Autoloader.php src/Tests`
-
+. Until now only User* class are tested
 # Detailed explanation
 ## General idea
 ### Summary
@@ -84,7 +84,7 @@ Except for user's account creation, all request can be done through the API, whi
 For now, to check if a user as enough right to access, the AuthenticationController simply check if the user is **THE** admin. But implementing a real role and rights system is on the todo list ;). Basically only an admin can access the User administration, otherwise they are not any restriction for pages.
 
 ## Database
-For now it only contains one table (User) which really has a classic structure except the **dynamicFields** column.
+It only contains 2 tables. Request and User which really have a classic structure except the **dynamicFields** for User.
 This is a string formated in JSON and every "field" has a small identifier. For example "Microsoft Office License" will be reduce to `MOL` and its value is true or false.
 
 ```javascript
@@ -160,3 +160,10 @@ First of all, the website is Responsive (thanks [Bootstrap](https://getbootstrap
 Block name are quite self explaining, every child just fill or complete each block.
 
 There are 2 main pages. [User index](https://github.com/MikaBob/blexr/blob/main/src/View/User/index.html.twig) (admin only) and [Request index](https://github.com/MikaBob/blexr/blob/main/src/View/Request/index.html.twig). Both present the list of each entities in a table and both contain a modal window to edit or confirm some actions.
+
+# Bugs & improvements
+There are still somes bugs. Lack of time, not a priority, etc... you know the song :) for example spam clicking modal's buttons will send severals request before it the modal properly.
+
+With more time, I would have improve the front end. Put more colors, format date in the table, separate dealed request (archive) on another table, make more code refactoring and unit test and some more ^^
+
+Thank you for reading, I spend ~43h on it over 5 days <3
