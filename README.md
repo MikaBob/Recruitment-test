@@ -1,4 +1,5 @@
-# Blexr
+# Recruitment-test
+Task for a job position
 Stand alone browser based app for tracking remote and on-site employee
 
 # Requirements
